@@ -5,7 +5,9 @@
   "description": "A fictional political simulation game. Students design a candidate; an AI polling analyst returns a simulated election report.",
   "scripts": {
     "dev": "vercel dev",
-    "test": "node scripts/test-simulation.js"
+    "test": "node scripts/test-simulation.js && node scripts/test-pages.js",
+    "test:engine": "node scripts/test-simulation.js",
+    "test:pages": "node scripts/test-pages.js"
   },
   "engines": {
     "node": ">=18"

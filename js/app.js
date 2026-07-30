@@ -1,5 +1,5 @@
 /* =========================================================================
-   app.js — site-wide behavior shared by every page:
+   app.js: site-wide behavior shared by every page:
    theme toggle, mobile nav, storage helpers, confetti, sound toggles.
    ========================================================================= */
 
@@ -28,14 +28,14 @@ function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   Storage.save(Storage.KEY_THEME, theme);
   document.querySelectorAll("[data-theme-toggle]").forEach(btn => {
-    btn.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
-    const label = btn.querySelector(".theme-label");
-    if (label) label.textContent = theme === "light" ? "Light Mode" : "Dark Mode";
+    btn.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+    /* The button label names the mode you would switch TO. */
+    btn.textContent = theme === "dark" ? "Light" : "Dark";
   });
 }
 
 function initTheme() {
-  const saved = Storage.load(Storage.KEY_THEME) || "dark";
+  const saved = Storage.load(Storage.KEY_THEME) || "light";
   applyTheme(saved);
   document.querySelectorAll("[data-theme-toggle]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -92,7 +92,7 @@ function playBlip(freq = 440, duration = 0.12, type = "sine") {
 window.playBlip = playBlip;
 
 /* Simple ambient "hum" loop for the background-music toggle. Built from
-   oscillators only — no external audio files, keeping the project 100%
+   oscillators only, no external audio files, keeping the project 100%
    self-contained for GitHub Pages. */
 let musicNodes = null;
 function startMusic() {
@@ -124,22 +124,24 @@ function initToggleButtons() {
   const musicBtn = document.querySelector("[data-music-toggle]");
 
   if (soundBtn) {
+    const label = on => "Sound: " + (on ? "on" : "off");
     const enabled = Storage.load(Storage.KEY_SOUND) !== false;
     soundBtn.setAttribute("aria-pressed", String(enabled));
-    soundBtn.classList.toggle("is-on", enabled);
+    soundBtn.textContent = label(enabled);
     soundBtn.addEventListener("click", () => {
       const now = Storage.load(Storage.KEY_SOUND) !== false;
       Storage.save(Storage.KEY_SOUND, !now);
       soundBtn.setAttribute("aria-pressed", String(!now));
-      soundBtn.classList.toggle("is-on", !now);
+      soundBtn.textContent = label(!now);
       if (!now) playBlip(520, 0.1);
     });
   }
 
   if (musicBtn) {
+    const label = on => "Music: " + (on ? "on" : "off");
     const enabled = Storage.load(Storage.KEY_MUSIC) === true;
     musicBtn.setAttribute("aria-pressed", String(enabled));
-    musicBtn.classList.toggle("is-on", enabled);
+    musicBtn.textContent = label(enabled);
     if (enabled) {
       document.body.addEventListener("click", function starter() {
         startMusic();
@@ -150,7 +152,7 @@ function initToggleButtons() {
       const now = Storage.load(Storage.KEY_MUSIC) === true;
       Storage.save(Storage.KEY_MUSIC, !now);
       musicBtn.setAttribute("aria-pressed", String(!now));
-      musicBtn.classList.toggle("is-on", !now);
+      musicBtn.textContent = label(!now);
       if (!now) startMusic(); else stopMusic();
     });
   }
@@ -159,7 +161,7 @@ function initToggleButtons() {
 /* ---------------------------- Confetti ---------------------------- */
 function launchConfetti(container, count = 90) {
   if (!container) return;
-  const colors = ["#c8102e", "#d4af37", "#ffffff", "#0a2540", "#e63950"];
+  const colors = ["#b22234", "#233c56", "#ffffff"];
   for (let i = 0; i < count; i++) {
     const piece = document.createElement("span");
     piece.className = "confetti-piece";
@@ -176,7 +178,7 @@ function launchConfetti(container, count = 90) {
 window.launchConfetti = launchConfetti;
 
 /* =========================================================================
-   CandidateUI — shared helpers used by the builder, the opponent picker,
+   CandidateUI: shared helpers used by the builder, the opponent picker,
    the simulator and the results page. Defined here so all four stay in
    sync on the candidate schema and the card markup.
    ========================================================================= */
@@ -186,7 +188,7 @@ const CandidateUI = {
     return {
       name: "", age: 45, party: "", occupation: "", state: "Texas",
       topIssue: "", slogan: "", about: "",
-      logoColor: (window.GameData && GameData.LOGO_COLOR_PALETTE[0]) || "#c8102e"
+      logoColor: (window.GameData && GameData.LOGO_COLOR_PALETTE[0]) || "#b22234"
     };
   },
 
@@ -209,15 +211,10 @@ const CandidateUI = {
 
   ageTag(age) {
     const a = Number(age) || 0;
-    if (a < 35) return "A young challenger. Energy is easy; credibility is the climb.";
+    if (a < 35) return "Young. Energy comes easy, credibility takes work.";
     if (a < 50) return "Mid-career. Old enough for a record, young enough for change.";
-    if (a < 65) return "Seasoned. Voters expect experience and will ask for proof.";
-    return "A veteran figure. Trusted by some, called out of touch by others.";
-  },
-
-  issueIcon(issue) {
-    const found = (window.GameData ? GameData.TOP_ISSUES : []).find(i => i.value === issue);
-    return found ? found.icon : "🗳️";
+    if (a < 65) return "Experienced. Voters will ask for proof.";
+    return "Veteran. Trusted by some, called out of touch by others.";
   },
 
   /* The candidate card, used on the builder preview, the opponent preview,
@@ -225,55 +222,46 @@ const CandidateUI = {
   cardHtml(c, options) {
     const opts = options || {};
     const esc = CandidateUI.escape;
-    const color = c.logoColor || "#c8102e";
+    const color = c.logoColor || "#b22234";
     const aboutBlock = opts.showAbout && c.about
       ? `<p class="candidate-about">${esc(c.about)}</p>` : "";
-    const issueBlock = c.topIssue
-      ? `<div class="candidate-issue-row"><span class="issue-pill">${CandidateUI.issueIcon(c.topIssue)} ${esc(c.topIssue)}</span></div>` : "";
 
     return `
-      <div class="candidate-card-banner" style="background:linear-gradient(135deg, ${esc(color)}, var(--navy-900));"></div>
+      <div class="candidate-card-banner" style="background:${esc(color)};"></div>
       <div class="candidate-card-body">
-        <div class="candidate-avatar" style="background:${esc(color)}33;">${esc(CandidateUI.initials(c.name))}</div>
-        <h3 class="candidate-name">${esc(c.name) || "Your Candidate"}</h3>
-        <div class="candidate-party">${esc(c.party) || "Party TBD"}</div>
-        <p class="candidate-slogan">"${esc(c.slogan) || "A slogan for the ages"}"</p>
+        <div class="candidate-avatar" style="background:${esc(color)};">${esc(CandidateUI.initials(c.name))}</div>
+        <h3 class="candidate-name">${esc(c.name) || "Your candidate"}</h3>
+        <div class="candidate-party">${esc(c.party) || "No party yet"}</div>
+        ${c.slogan ? `<p class="candidate-slogan">${esc(c.slogan)}</p>` : ""}
         <dl class="candidate-meta">
-          <dt>Age</dt><dd>${esc(c.age) || "—"}</dd>
-          <dt>Home State</dt><dd>${esc(c.state) || "—"}</dd>
-          <dt>Was a</dt><dd>${esc(c.occupation) || "—"}</dd>
-          <dt>Runs on</dt><dd>${esc(c.topIssue) || "—"}</dd>
+          <dt>Age</dt><dd>${esc(c.age) || "Not set"}</dd>
+          <dt>State</dt><dd>${esc(c.state) || "Not set"}</dd>
+          <dt>Was a</dt><dd>${esc(c.occupation) || "Not set"}</dd>
+          <dt>Runs on</dt><dd>${esc(c.topIssue) || "Not set"}</dd>
         </dl>
-        ${issueBlock}
         ${aboutBlock}
       </div>`;
   },
 
   /* Renders a grid of selectable tiles. `items` may be strings or
-     { value, icon, blurb } objects. Calls onPick(value) on selection. */
+     { value, blurb } objects. Calls onPick(value) on selection. */
   renderTiles(container, items, selected, onPick) {
     if (!container) return;
     container.innerHTML = "";
     items.forEach(item => {
       const value = typeof item === "string" ? item : item.value;
-      const icon = typeof item === "string" ? "" : (item.icon || "");
       const blurb = typeof item === "string" ? "" : (item.blurb || "");
       const tile = document.createElement("button");
       tile.type = "button";
-      tile.className = "pick-tile" + (value === selected ? " selected" : "");
+      tile.className = "tile";
       tile.setAttribute("role", "radio");
       tile.setAttribute("aria-checked", value === selected ? "true" : "false");
       tile.dataset.value = value;
       tile.innerHTML =
-        (icon ? `<span class="tile-icon" aria-hidden="true">${icon}</span>` : "") +
         `<span class="tile-name">${CandidateUI.escape(value)}</span>` +
         (blurb ? `<span class="tile-blurb">${CandidateUI.escape(blurb)}</span>` : "");
       tile.addEventListener("click", () => {
-        container.querySelectorAll(".pick-tile").forEach(t => {
-          t.classList.remove("selected");
-          t.setAttribute("aria-checked", "false");
-        });
-        tile.classList.add("selected");
+        container.querySelectorAll(".tile").forEach(t => t.setAttribute("aria-checked", "false"));
         tile.setAttribute("aria-checked", "true");
         playBlip(520, 0.06);
         onPick(value);
@@ -321,7 +309,7 @@ const CandidateUI = {
     { key: "state",      label: "Home State" },
     { key: "topIssue",   label: "Top Issue" },
     { key: "slogan",     label: "Slogan" },
-    { key: "about",      label: "About (3+ sentences)" }
+    { key: "about",      label: "About" }
   ],
 
   isFilled(c, key) {

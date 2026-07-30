@@ -1,5 +1,5 @@
 /* =========================================================================
-   api/simulate.js — Vercel Serverless Function.
+   api/simulate.js: Vercel Serverless Function.
 
    POST /api/simulate
    Body: { candidate: {...}, opponent: {...}|null }
@@ -26,7 +26,7 @@ const REQUEST_TIMEOUT_MS = 45000;
 
 /* ------------------------------ rate limit ------------------------------ */
 /* Serverless instances are short-lived, so this is a soft speed bump that
-   stops one browser tab hammering the endpoint — not real abuse protection.
+   stops one browser tab hammering the endpoint, not real abuse protection.
    For a school deployment that is enough. */
 const RATE_LIMIT = { windowMs: 60000, max: 12 };
 const hits = new Map();

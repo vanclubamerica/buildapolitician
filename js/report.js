@@ -1,182 +1,195 @@
 /* =========================================================================
-   report.js — renders a simulation result object into HTML.
+   report.js: renders a simulation result object into HTML.
 
    Shared by simulator.html (which renders the report right after running
-   it) and results.html (which renders the saved copy). Both get identical
-   output, so there is exactly one place to change the layout.
+   it) and results.html (which renders the saved copy), so there is exactly
+   one place to change the layout.
 
-   The result object shape is defined in api/_prompt.js and guaranteed by
-   api/simulate.js — see normaliseResult() there.
+   Result shape is defined in api/_prompt.js and guaranteed by
+   normaliseResult() in api/simulate.js.
    ========================================================================= */
 
 const Report = (function () {
   const esc = str => CandidateUI.escape(str);
+  const pct = n => Math.max(0, Math.min(100, Number(n) || 0));
 
-  function pct(n) { return Math.max(0, Math.min(100, Number(n) || 0)); }
+  /* ------------------------------ verdict ------------------------------ */
 
-  /* ------------------------------ headline ----------------------------- */
-
-  function headlineHtml(r) {
-    const poll = r.poll_results;
-    const margin = poll.candidate - poll.opponent;
-    const marginText = (margin > 0 ? "+" : "") + margin;
-    const approvalNet = r.approval_rating.approve - r.approval_rating.disapprove;
-
+  function verdict(r) {
+    const p = r.poll_results;
+    const margin = p.candidate - p.opponent;
+    const lead = margin > 0 ? "leads by " + margin : margin < 0 ? "trails by " + Math.abs(margin) : "is tied";
     return `
-      <div class="headline-grid">
-        <div class="stat-tile card">
-          <span class="big-num">${esc(r.projection)}</span>
-          <span class="tile-label">Projection</span>
-        </div>
-        <div class="stat-tile card">
-          <span class="big-num">${r.approval_rating.approve}%</span>
-          <span class="tile-label">Approve (net ${approvalNet > 0 ? "+" : ""}${approvalNet})</span>
-        </div>
-        <div class="stat-tile card">
-          <span class="big-num">${marginText}</span>
-          <span class="tile-label">Points vs ${esc(r.opponent_name)}</span>
-        </div>
-        <div class="stat-tile card">
-          <span class="big-num">${poll.undecided}%</span>
-          <span class="tile-label">Still Undecided</span>
-        </div>
+      <div class="verdict">
+        <p class="eyebrow">Projection</p>
+        <p class="outcome">${esc(r.projection)}</p>
+        <p class="score">${esc(r.candidate_name)} ${lead}${margin === 0 ? "" : " points"}</p>
       </div>`;
   }
 
-  /* ----------------------------- split bars ---------------------------- */
+  /* ------------------------------ metrics ------------------------------ */
 
-  /* Bars are rendered at width:0 with the real width parked in a data
-     attribute, then filled in on the next frame so the CSS transition has
-     something to animate from. */
-  function splitBar(segments) {
-    const bars = segments.map(s =>
-      `<span class="${s.cls}" style="width:0%" data-width="${pct(s.value)}">${s.value >= 8 ? s.value + "%" : ""}</span>`
-    ).join("");
-    const legend = segments.map(s =>
-      `<span><i style="background:${s.swatch}"></i>${esc(s.label)} — ${s.value}%</span>`
-    ).join("");
-    return `<div class="split-bar">${bars}</div><div class="split-legend">${legend}</div>`;
-  }
-
-  function approvalHtml(r) {
+  function metrics(r) {
     const a = r.approval_rating;
-    return `
-      <div class="card card-pad mb-2">
-        <h3>Overall Approval Rating</h3>
-        <p>Of every fictional voter surveyed, this is how many approve of ${esc(r.candidate_name)} as a person and a leader — separate from who they intend to vote for.</p>
-        ${splitBar([
-          { cls: "seg-approve",    value: a.approve,    label: "Approve",    swatch: "#3fa663" },
-          { cls: "seg-disapprove", value: a.disapprove, label: "Disapprove", swatch: "#c8102e" },
-          { cls: "seg-unsure",     value: a.unsure,     label: "Not sure",   swatch: "rgba(255,255,255,0.25)" }
-        ])}
-      </div>`;
-  }
-
-  function pollHtml(r) {
     const p = r.poll_results;
     return `
-      <div class="card card-pad mb-2">
-        <h3>Election Poll Results</h3>
-        <p>If the fictional election were held today.</p>
-        ${splitBar([
-          { cls: "seg-candidate", value: p.candidate, label: esc(r.candidate_name), swatch: "#1f4e79" },
-          { cls: "seg-opponent",  value: p.opponent,  label: esc(r.opponent_name),  swatch: "#c8102e" },
-          { cls: "seg-undecided", value: p.undecided, label: "Undecided",           swatch: "rgba(255,255,255,0.25)" }
-        ])}
+      <div class="metrics">
+        <div class="card metric">
+          <div class="value">${p.candidate}%</div>
+          <div class="label">Your vote share</div>
+        </div>
+        <div class="card metric">
+          <div class="value">${a.approve}%</div>
+          <div class="label">Approve of ${esc(r.candidate_name)}</div>
+        </div>
+        <div class="card metric">
+          <div class="value">${p.undecided}%</div>
+          <div class="label">Still undecided</div>
+        </div>
       </div>`;
   }
 
-  /* ---------------------------- demographics --------------------------- */
+  /* ------------------------------- bars -------------------------------- */
 
-  function demoColumn(title, rows) {
-    const body = (rows || []).map(row => `
-      <div class="demo-row">
-        <div class="demo-row-top"><span>${esc(row.group)}</span><b>${pct(row.support)}%</b></div>
-        <div class="demo-track"><span style="width:0%" data-width="${pct(row.support)}"></span></div>
-        ${row.note ? `<p class="demo-note">${esc(row.note)}</p>` : ""}
-      </div>`).join("");
+  /* Bars render at width 0 with the real value parked in a data attribute,
+     then get filled on the next frame so the CSS transition has something
+     to animate from. */
+  function bar(segments) {
+    const fills = segments.map(s =>
+      `<span class="${s.cls}" style="width:0" data-width="${pct(s.value)}">${s.value >= 10 ? s.value + "%" : ""}</span>`
+    ).join("");
+    const legend = segments.map(s =>
+      `<span><i style="background:${s.swatch}"></i>${esc(s.label)} ${s.value}%</span>`
+    ).join("");
+    return `<div class="split">${fills}</div><div class="legend">${legend}</div>`;
+  }
+
+  function polling(r) {
+    const a = r.approval_rating;
+    const p = r.poll_results;
+    return `
+      <div class="grid grid-2">
+        <div class="card card-pad">
+          <h3>Poll</h3>
+          ${bar([
+            { cls: "seg-a", value: p.candidate, label: esc(r.candidate_name), swatch: "var(--navy)" },
+            { cls: "seg-b", value: p.opponent,  label: esc(r.opponent_name),  swatch: "var(--red)" },
+            { cls: "seg-c", value: p.undecided, label: "Undecided",           swatch: "var(--line-strong)" }
+          ])}
+        </div>
+        <div class="card card-pad">
+          <h3>Approval</h3>
+          ${bar([
+            { cls: "seg-a", value: a.approve,    label: "Approve",    swatch: "var(--navy)" },
+            { cls: "seg-b", value: a.disapprove, label: "Disapprove", swatch: "var(--red)" },
+            { cls: "seg-c", value: a.unsure,     label: "Not sure",   swatch: "var(--line-strong)" }
+          ])}
+        </div>
+      </div>`;
+  }
+
+  /* ---------------------------- voter groups --------------------------- */
+
+  function groupColumn(title, rows) {
+    const body = (rows || []).map(row => {
+      const v = pct(row.support);
+      const tone = v >= 55 ? " high" : v <= 42 ? " low" : "";
+      return `
+        <div class="group-row">
+          <div class="group-head"><span>${esc(row.group)}</span><b>${v}%</b></div>
+          <div class="group-track${tone}"><span style="width:0" data-width="${v}"></span></div>
+          ${row.note ? `<p class="group-note">${esc(row.note)}</p>` : ""}
+        </div>`;
+    }).join("");
     return `<div class="card card-pad"><h3>${esc(title)}</h3>${body}</div>`;
   }
 
-  function demographicsHtml(r) {
+  function groups(r) {
     const d = r.demographics || {};
     return `
-      <div class="mb-2">
-        <h3>Voter Breakdown</h3>
-        <p>Percentage of each group supporting ${esc(r.candidate_name)}. The faint line marks 50%.</p>
-        <div class="demo-columns">
-          ${demoColumn("By Age", d.age)}
-          ${demoColumn("By Political Lean", d.lean)}
-          ${demoColumn("By Location", d.location)}
-        </div>
+      <h2 class="mt-3 mb-1">Voter groups</h2>
+      <p class="small muted mb-2">Share of each group backing ${esc(r.candidate_name)}.</p>
+      <div class="groups">
+        ${groupColumn("Age", d.age)}
+        ${groupColumn("Political lean", d.lean)}
+        ${groupColumn("Location", d.location)}
       </div>`;
   }
 
-  /* ------------------------ strengths + weaknesses --------------------- */
+  /* --------------------------- strengths / weaknesses ------------------ */
 
-  function pointsHtml(items, direction) {
-    if (!items || !items.length) return "<p>No clear signal.</p>";
-    return `<ul class="point-list ${direction}">` + items.map(p => `
-      <li><strong>${esc(p.title)}</strong><p>${esc(p.detail)}</p></li>`).join("") + "</ul>";
+  /* Only the first two points are shown up front. The rest sit behind a
+     "Show more" toggle so the page is scannable instead of a wall of text. */
+  function pointList(items) {
+    if (!items || !items.length) return `<p class="small muted">Nothing notable.</p>`;
+    const render = p => `<li><b>${esc(p.title)}</b><p>${esc(p.detail)}</p></li>`;
+    const head = items.slice(0, 2).map(render).join("");
+    const rest = items.slice(2);
+    const more = rest.length
+      ? `<details class="more"><summary>Show ${rest.length} more</summary>
+           <div class="more-body"><ul class="points">${rest.map(render).join("")}</ul></div>
+         </details>`
+      : "";
+    return `<ul class="points">${head}</ul>${more}`;
   }
 
-  function analysisHtml(r) {
+  function analysis(r) {
     return `
-      <div class="mb-2">
-        <h3>Candidate Analysis</h3>
-        <div class="analysis-grid">
-          <div class="card card-pad">
-            <h4 style="color:#6be089;">Strengths — why voters support them</h4>
-            ${pointsHtml(r.strengths, "up")}
-          </div>
-          <div class="card card-pad">
-            <h4 style="color:var(--red-400);">Weaknesses — why voters oppose them</h4>
-            ${pointsHtml(r.weaknesses, "down")}
-          </div>
+      <h2 class="mt-3 mb-2">Analysis</h2>
+      <div class="grid grid-2">
+        <div class="card card-pad">
+          <h3>Strengths</h3>
+          ${pointList(r.strengths)}
+        </div>
+        <div class="card card-pad">
+          <h3>Weaknesses</h3>
+          ${pointList(r.weaknesses)}
         </div>
       </div>`;
   }
 
   /* ------------------------------- events ------------------------------ */
 
-  function eventsHtml(r) {
+  function events(r) {
     if (!r.events || !r.events.length) return "";
-    const items = r.events.map(e => {
+    const item = e => {
       const impact = Number(e.impact) || 0;
       const cls = impact > 0 ? "up" : impact < 0 ? "down" : "flat";
       const label = impact > 0 ? "+" + impact : String(impact);
       return `
-        <div class="event-item">
-          <div class="event-swing ${cls}">${label}</div>
+        <li>
+          <div class="swing ${cls}">${label}</div>
           <div>
-            <h4>${esc(e.headline)}</h4>
+            <b>${esc(e.headline)}</b>
             <p>${esc(e.detail)}</p>
-            <span class="event-affected">Moved: ${esc(e.affected)}</span>
+            <span class="who">${esc(e.affected)}</span>
           </div>
-        </div>`;
-    }).join("");
-
+        </li>`;
+    };
+    const head = r.events.slice(0, 3).map(item).join("");
+    const rest = r.events.slice(3);
+    const more = rest.length
+      ? `<details class="more"><summary>Show ${rest.length} more</summary>
+           <div class="more-body"><ul class="timeline">${rest.map(item).join("")}</ul></div>
+         </details>`
+      : "";
     return `
-      <div class="mb-2">
-        <h3>Campaign Events</h3>
-        <p>Fictional moments from the campaign and how many points each one moved the polls.</p>
-        <div class="event-feed">${items}</div>
-      </div>`;
+      <h2 class="mt-3 mb-1">Campaign events</h2>
+      <p class="small muted mb-2">Moments that moved the numbers.</p>
+      <div class="card card-pad"><ul class="timeline">${head}</ul>${more}</div>`;
   }
 
-  /* ------------------------------- summary ----------------------------- */
+  /* ------------------------------ summary ------------------------------ */
 
-  function summaryHtml(r) {
-    const tag = r.source === "ai"
-      ? `<span class="source-tag">🤖 AI analyst${r.model ? " — " + esc(r.model) : ""}</span>`
-      : `<span class="source-tag">📊 Offline model</span>`;
+  function summary(r) {
+    const tag = r.source === "ai" ? "AI analyst" : "Offline model";
     return `
-      <div class="card card-pad mb-2">
-        <div class="flex-between" style="align-items:flex-start;">
-          <h3 style="margin:0;">Analyst's Read</h3>
-          ${tag}
+      <div class="card card-pad mt-3">
+        <div class="flex-between mb-1">
+          <h3 style="margin:0;">Summary</h3>
+          <span class="tag">${esc(tag)}</span>
         </div>
-        <p class="mt-2" style="color:var(--text);">${esc(r.analyst_summary)}</p>
+        <p>${esc(r.analyst_summary)}</p>
       </div>`;
   }
 
@@ -184,24 +197,19 @@ const Report = (function () {
 
   function render(container, result) {
     if (!container || !result) return;
-    const notice = result.notice
-      ? `<div class="notice-bar">${esc(result.notice)}</div>` : "";
 
     container.innerHTML =
-      notice +
-      headlineHtml(result) +
-      `<div class="mt-2"></div>` +
-      approvalHtml(result) +
-      pollHtml(result) +
-      demographicsHtml(result) +
-      analysisHtml(result) +
-      eventsHtml(result) +
-      summaryHtml(result) +
-      `<p class="disclaimer">Every number, voter, and event above is invented by a simulation for a classroom exercise.
-       Nothing here describes, predicts, or comments on a real election, a real person, or a real political party.</p>`;
+      (result.notice ? `<div class="notice">${esc(result.notice)}</div>` : "") +
+      verdict(result) +
+      `<div class="mt-2">${metrics(result)}</div>` +
+      `<div class="mt-2">${polling(result)}</div>` +
+      groups(result) +
+      analysis(result) +
+      events(result) +
+      summary(result) +
+      `<p class="footnote">Every voter, poll and event here is invented for this simulation.
+       It does not describe or predict a real election.</p>`;
 
-    /* Fill every bar on the next frame so the CSS transitions actually run
-       rather than the widths snapping into place. */
     requestAnimationFrame(() => {
       container.querySelectorAll("span[data-width]").forEach(el => {
         el.style.width = el.dataset.width + "%";

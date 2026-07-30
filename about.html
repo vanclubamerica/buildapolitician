@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About — Build-A-Politician</title>
-<meta name="description" content="About the Build-A-Politician fictional election simulator.">
+<title>About | Build-A-Politician</title>
+<meta name="description" content="About Build-A-Politician, a fictional election simulation for classrooms.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Reading the press packet…</span></div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Loading</span></div>
 
 <header class="site-header">
   <div class="container nav-row">
@@ -18,74 +18,63 @@
     <nav aria-label="Primary">
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="create.html">Create Politician</a></li>
-        <li><a href="opponent.html">Choose Opponent</a></li>
-        <li><a href="simulator.html">Election Simulator</a></li>
-        <li><a href="results.html">Results</a></li>
+        <li><a href="create.html">Create Candidate</a></li>
+        <li><a href="simulator.html">Simulator</a></li>
         <li><a href="how-it-works.html">How It Works</a></li>
-        <li><a href="about.html" aria-current="page">About</a></li>
       </ul>
     </nav>
     <div class="nav-tools">
-      <button class="icon-toggle" data-sound-toggle title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
-      <button class="icon-toggle" data-music-toggle title="Toggle background music" aria-label="Toggle background music">🎵</button>
-      <button class="theme-pill" data-theme-toggle aria-pressed="false"><span aria-hidden="true">🌓</span><span class="theme-label">Dark Mode</span></button>
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <button class="theme-pill" data-theme-toggle aria-pressed="false">Dark</button>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="section" style="padding-top:2.5rem;">
-    <div class="container">
-      <p class="eyebrow">About the project</p>
-      <h1>Build-A-Politician</h1>
-      <div class="two-col mt-2">
-        <div class="card card-pad">
-          <h2 style="font-size:1.3rem;">What This Is</h2>
-          <p>Build-A-Politician is a fictional political strategy simulator. Every candidate you build or select is
-          an invented character — no real names, likenesses, or endorsements are used anywhere in the project.
-          It's meant purely as an entertaining way to explore how personal traits, policy platforms, and
-          campaign events might interact in a simulated election.</p>
-          <p>There is no account and no sign-up. The candidates you build are saved in your own browser. When you
-          run a simulation, the candidate profile you wrote is sent to an AI model to be analyzed, and the report
-          comes back — nothing else about you is collected or stored.</p>
-        </div>
-        <div class="card card-pad">
-          <h2 style="font-size:1.3rem;">Created By</h2>
-          <p><strong>Van Club America</strong><br>Van, Texas</p>
-          <p>Build-A-Politician is plain HTML, CSS, and JavaScript with no frameworks. The one piece of server code
-          is a small function that holds the AI key so it never has to be exposed in the browser.</p>
-          <img src="assets/svg/banner.svg" alt="Campaign bunting banner illustration" class="mt-2">
-        </div>
+  <div class="container narrow section-tight">
+    <h1>About</h1>
+    <p class="lead mb-3">A fictional election simulation built for classrooms.</p>
+
+    <div class="stack">
+      <div class="card card-pad">
+        <h2>What this is</h2>
+        <p>Every candidate you build or pick is invented. No real names or likenesses are used. It is a way to see
+        how a candidate's background, message and personality might shape the way voters respond.</p>
       </div>
 
-      <div class="card card-pad mt-2">
-        <h2 style="font-size:1.3rem;">On Fairness</h2>
-        <p>The AI analyst is instructed that no party, ideology, or issue position is inherently more popular, more
-        moral, or more electable than any other, and that it may never praise or criticize a real-world political
-        position. What it scores is how well a candidate is <em>constructed</em>: is the message clear, does the
-        background support the issue, is the slogan memorable, do the pieces tell one consistent story. Two equally
-        well-written candidates score equally well no matter what they believe.</p>
-        <p>The offline model that runs when the AI is unavailable follows the same rule, and the project's automated
-        tests check it directly: change only a candidate's party label and the headline poll number must not move.</p>
+      <div class="card card-pad">
+        <h2>Your data</h2>
+        <p>No account, no sign-up. Candidates save in your own browser. When you run a simulation, the profile you
+        wrote is sent to an AI model and the report comes back. Nothing else is collected.</p>
       </div>
 
-      <div class="card card-pad mt-2">
-        <h2 style="font-size:1.3rem;">A Note on Fiction</h2>
-        <p>This site is satire and entertainment. Some of the pre-built opponents in the roster are loosely
-        inspired, in tone and era, by figures from American political history — but every name, party, and
-        biographical detail has been invented for the game. Nothing on this site should be read as a factual
-        claim about any real person.</p>
+      <div class="card card-pad">
+        <h2>Fairness</h2>
+        <p>No party, ideology or issue is treated as better or more electable. What gets scored is how well the
+        candidate is written: clear message, believable background, memorable slogan, consistent story.</p>
+      </div>
+
+      <div class="card card-pad">
+        <h2>Made by</h2>
+        <p>Van Club America, Van, Texas.</p>
       </div>
     </div>
-  </section>
+
+    <div class="text-center mt-3">
+      <a class="btn large" href="create.html">Create a candidate</a>
+    </div>
+  </div>
 </main>
 
 <footer class="site-footer">
   <div class="container footer-row">
-    <div class="footer-brand">Build-A-Politician</div>
-    <div class="footer-credit">Created by Van Club America • Van, Texas<br>© <span data-year></span> Build-A-Politician.</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="create.html">Create</a></li>
+      <li><a href="simulator.html">Simulator</a></li>
+      <li><a href="how-it-works.html">How it works</a></li>
+    </ul>
+    <p class="footer-note">A fictional simulation.</p>
   </div>
 </footer>
 

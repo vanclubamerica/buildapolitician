@@ -30,7 +30,7 @@ site falls back to its built-in offline model and says so on screen.
 
 ## Why a backend was necessary
 
-**GitHub Pages cannot do this.** Pages serves static files only — it cannot run server code and it
+**GitHub Pages cannot do this.** Pages serves static files only: it cannot run server code and it
 cannot hold a secret. Anything the browser can read, a visitor can read. Putting an OpenAI key in
 a `.js` file, in an HTML attribute, or in a "hidden" config file on Pages means publishing it: the
 key is in the page source, in the network tab, and in the public GitHub repo. Keys found this way
@@ -58,7 +58,7 @@ Browser                     Vercel Function                 OpenAI
 | GitHub Pages + Cloudflare Worker | Works, but means two deploy targets, two dashboards, and CORS configuration. More to explain and more to break. |
 | Netlify | Equivalent to Vercel. Functions live in `/netlify/functions` instead of `/api`. |
 
-Everything in this repo still works as a plain static site — moving to Vercel adds a backend
+Everything in this repo still works as a plain static site: moving to Vercel adds a backend
 without taking anything away.
 
 ### How the key is protected
@@ -69,7 +69,7 @@ without taking anything away.
 4. `api/simulate.js` rate-limits to 12 requests per minute per IP, caps input field lengths, and
    rejects anything that is not a POST with a named candidate.
 5. If you ever paste a key somewhere public, revoke it at
-   <https://platform.openai.com/api-keys> — rotating is free, cleanup is not.
+   <https://platform.openai.com/api-keys>: rotating is free, cleanup is not.
 
 ---
 
@@ -79,7 +79,7 @@ without taking anything away.
 
 1. Push this repo to GitHub.
 2. Go to <https://vercel.com/new>, sign in with GitHub, and import the repo.
-3. Framework preset: **Other**. Leave build command and output directory empty — this is a static
+3. Framework preset: **Other**. Leave build command and output directory empty: this is a static
    site with serverless functions.
 4. Before clicking Deploy, open **Environment Variables** and add:
    - Name `OPENAI_API_KEY`, value your key from <https://platform.openai.com/api-keys>
@@ -88,7 +88,7 @@ without taking anything away.
 
 ### Custom domain (bap.tpvan.com)
 
-In the Vercel project: **Settings → Domains → Add** `bap.tpvan.com`, then update the CNAME record
+In the Vercel project: **Settings, Domains, Add** `bap.tpvan.com`, then update the CNAME record
 at your DNS provider to point at Vercel instead of GitHub Pages. Keep the `CNAME` file in the repo
 only if you also want the GitHub Pages copy to keep working; Vercel ignores it.
 
@@ -98,9 +98,9 @@ Every push to your default branch redeploys automatically.
 
 ### Accounts you need
 
-- **GitHub** — hosts the code. Free.
-- **Vercel** — hosts the site and the function. Free Hobby tier is plenty for a class.
-- **OpenAI Platform** — provides the API key, and requires a payment method with credits.
+- **GitHub**: hosts the code. Free.
+- **Vercel**: hosts the site and the function. Free Hobby tier is plenty for a class.
+- **OpenAI Platform**: provides the API key, and requires a payment method with credits.
   This is the only paid piece. At the default `gpt-4o-mini`, a simulation costs a fraction of a
   cent; a class of thirty students running ten simulations each costs well under a dollar.
   Set a **monthly budget limit** in the OpenAI billing settings so it can never surprise you.
@@ -118,26 +118,27 @@ Every push to your default branch redeploys automatically.
 | `js/simulation-engine.js` | The offline model. Runs in both the browser and Node so the same code backs up both the front end and the server. |
 | `js/report.js` | Renders a result object into HTML. Shared by the simulator and results pages so they cannot drift apart. |
 | `scripts/test-simulation.js` | 81 assertions covering the engine, the handler, response repair, input sanitising, and political neutrality. |
+| `scripts/test-pages.js` | 33 assertions that load each real page and click its real buttons in a minimal DOM. |
 | `vercel.json`, `package.json`, `.env.example`, `.gitignore` | Deployment and configuration. |
-| `assets/**` | Eight SVGs that every page referenced but which were missing from the repo — every image on the site was a broken link. |
+| `assets/**` | Eight SVGs that every page referenced but which were missing from the repo: every image on the site was a broken link. |
 
 ### Rewritten
 
-- **`create.html` + `js/builder.js`** — rebuilt as a character creator. Eight fields
+- **`create.html` + `js/builder.js`**: rebuilt as a character creator. Eight fields
   (name, age, party, occupation before politics, home state, top issue, slogan, about), tile
   pickers instead of dropdowns, an age scrubber, a guided About box with clickable question
   prompts and a sentence counter, a live candidate card, and a completion meter.
-- **`simulator.html` + `js/simulator.js`** — now the AI simulation page with a
+- **`simulator.html` + `js/simulator.js`**: now the AI simulation page with a
   **Run Election Simulation** button, a thinking state, and the full report.
-- **`results.html` + `js/results.js`** — **this page was broken.** `results.html` was a
+- **`results.html` + `js/results.js`**: **this page was broken.** `results.html` was a
   byte-for-byte duplicate of `simulator.html`, so none of the elements `results.js` looked for
   existed and the page never rendered. Rewritten properly.
-- **`opponent.html` + `js/opponent.js`** — updated to the new schema. Choosing an opponent is now
+- **`opponent.html` + `js/opponent.js`**: updated to the new schema. Choosing an opponent is now
   optional; skip it and the analyst invents one.
-- **`js/data.js`** — new candidate schema, parties, 12 top issues, 23 occupations, and all 25
-  pre-built politicians rewritten with real 3–5 sentence biographies.
-- **`js/app.js`** — added `CandidateUI`, the shared card/tile/validation helpers.
-- **`css/style.css`** — added the creator and report styles. Existing tokens and look untouched.
+- **`js/data.js`**: new candidate schema, parties, 12 top issues, 23 occupations, and all 25
+  pre-built politicians rewritten with real 3 to 5 sentence biographies.
+- **`js/app.js`**: added `CandidateUI`, the shared card/tile/validation helpers.
+- **`css/style.css`**: rewritten as a single design system (see below).
 
 ### Removed
 
@@ -146,9 +147,51 @@ that depended on them. Both were replaced by the AI analysis, as agreed.
 
 ---
 
+## Design system
+
+The interface was rebuilt around three colors and one typeface.
+
+| Token | Value | Used for |
+|---|---|---|
+| `--red` | `#b22234` | Buttons, the active tab underline, negative swings |
+| `--navy` | `#233c56` | Text, headings, filled bars, the logo |
+| `--white` | `#ffffff` | Page and card backgrounds |
+
+Everything else is a neutral derived from those: `--line` for hairline borders, `--panel-alt`
+for banded sections, `--text-soft` and `--text-faint` for supporting copy. Dark mode overrides
+the same variables, so there is one place to change any color.
+
+Typography is Inter at a deliberately small scale: `h1` 2rem, `h2` 1.375rem, `h3` 1.0625rem,
+body 16px at 1.6 line height, two weights only (400 and 600). No display face, no uppercase
+headings, no gradients, no glows.
+
+Conventions worth knowing if you edit this:
+
+- Navigation is four items. Opponents, Results and About are still full pages and are linked
+  from the footer and contextually where they are needed.
+- No emoji anywhere in the interface, and no em dashes in any copy, including what the AI
+  writes. The prompt in `api/_prompt.js` bans both explicitly.
+- Long analysis is collapsed. Strengths, weaknesses and events show the first two or three
+  items and hide the rest behind a `<details class="more">` toggle, which prints expanded.
+- Copy is short by rule. If a sentence explains what a button obviously does, it was cut.
+
+## Tests
+
+```bash
+npm test            # both suites
+npm run test:engine # 81 assertions: model, handler, repair, neutrality
+npm run test:pages  # 33 assertions: real pages, real scripts, real clicks
+```
+
+`test:pages` loads each page's HTML with its real scripts in a minimal DOM and clicks the
+actual buttons, so a renamed element ID or a broken handler fails the build rather than
+reaching a classroom.
+
+---
+
 ## The candidate schema
 
-Every candidate everywhere — student-built, custom opponent, or roster character — is this object:
+Every candidate (student-built, custom opponent, or roster character) is this object:
 
 ```json
 {
@@ -160,7 +203,7 @@ Every candidate everywhere — student-built, custom opponent, or roster charact
   "topIssue": "Economy",
   "slogan": "Common Sense. Real Results.",
   "about": "John Carter is a blunt, confident leader who...",
-  "logoColor": "#c8102e"
+  "logoColor": "#b22234"
 }
 ```
 
@@ -205,7 +248,7 @@ party is deliberately excluded from the random seed and from every score, so cha
 label produces an identical headline number with a different demographic breakdown. `npm test`
 asserts this directly.
 
-The one content-based bonus is whether the chosen issue fits the candidate's previous job — a nurse
+The one content-based bonus is whether the chosen issue fits the candidate's previous job: a nurse
 running on healthcare starts with earned authority a nurse running on national security does not.
 It is capped, symmetric, available to every candidate, and explained in the report text.
 

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>How It Works — Build-A-Politician</title>
-<meta name="description" content="How the Build-A-Politician election engine scores candidates and simulates election night.">
+<title>How It Works | Build-A-Politician</title>
+<meta name="description" content="How the simulator scores a candidate and why party never changes the score.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Briefing the analysts…</span></div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Loading</span></div>
 
 <header class="site-header">
   <div class="container nav-row">
@@ -18,95 +18,81 @@
     <nav aria-label="Primary">
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="create.html">Create Politician</a></li>
-        <li><a href="opponent.html">Choose Opponent</a></li>
-        <li><a href="simulator.html">Election Simulator</a></li>
-        <li><a href="results.html">Results</a></li>
+        <li><a href="create.html">Create Candidate</a></li>
+        <li><a href="simulator.html">Simulator</a></li>
         <li><a href="how-it-works.html" aria-current="page">How It Works</a></li>
-        <li><a href="about.html">About</a></li>
       </ul>
     </nav>
     <div class="nav-tools">
-      <button class="icon-toggle" data-sound-toggle title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
-      <button class="icon-toggle" data-music-toggle title="Toggle background music" aria-label="Toggle background music">🎵</button>
-      <button class="theme-pill" data-theme-toggle aria-pressed="false"><span aria-hidden="true">🌓</span><span class="theme-label">Dark Mode</span></button>
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <button class="theme-pill" data-theme-toggle aria-pressed="false">Dark</button>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="section" style="padding-top:2.5rem;">
-    <div class="container">
-      <p class="eyebrow">Under the hood</p>
-      <h1>How the Simulator Works</h1>
-      <p class="hero-sub">Your candidate is read by an AI acting as a nonpartisan polling analyst. It scores how well the candidate is <em>built</em> — never which politics they hold.</p>
+  <div class="container narrow section-tight">
+    <h1>How it works</h1>
+    <p class="lead mb-3">Your candidate is scored on how well they are built, not on what they believe.</p>
 
-      <div class="card card-pad mt-2">
-        <ol class="numbered-steps">
-          <li><span class="step-num">01</span><div><strong>You build a candidate.</strong> Eight fields: name, age, party, occupation before
-            politics, home state, top issue, campaign slogan, and a 3–5 sentence description. The description does the most work.</div></li>
-          <li><span class="step-num">02</span><div><strong>The profile is sent to the analyst.</strong> Your browser posts the candidate to a small
-            server function. That function adds a secret API key and forwards the profile to OpenAI. The key never reaches your browser.</div></li>
-          <li><span class="step-num">03</span><div><strong>The analyst reads and reasons.</strong> It judges clarity, credibility, relatability,
-            memorability, and coherence — does the age, job, state, issue, and personality tell one consistent story?</div></li>
-          <li><span class="step-num">04</span><div><strong>It reports back in structured form.</strong> Approval rating, head-to-head poll,
-            support broken down by age, political lean, and location, plus strengths, weaknesses, and campaign events.</div></li>
-          <li><span class="step-num">05</span><div><strong>The site checks the numbers.</strong> Before anything is displayed, the server verifies
-            the percentages add to 100 and every voter group is present, repairing the response if the model drifts.</div></li>
-          <li><span class="step-num">06</span><div><strong>You change one thing and run it again.</strong> That comparison — same candidate,
-            sharper slogan or a different top issue — is where the actual learning happens.</div></li>
+    <div class="stack">
+      <div class="card card-pad">
+        <h2>The steps</h2>
+        <ol>
+          <li>You fill in eight fields. The description does most of the work.</li>
+          <li>Your browser sends the profile to a server, which adds a secret key and forwards it to an AI model.</li>
+          <li>The AI returns approval numbers, polling, voter groups, strengths, weaknesses and campaign events.</li>
+          <li>The server checks the percentages add to 100 before anything is shown.</li>
         </ol>
       </div>
 
-      <div class="card card-pad mt-2">
-        <h2 style="font-size:1.4rem;">Where the numbers come from</h2>
-        <p>The analyst is explicitly instructed that no party, ideology, or issue position is more popular, more moral,
-        or more electable than any other. Democrat, Republican, Independent, Libertarian, Green, and invented parties all
-        start from the same place. A party label changes <em>which voter groups start friendly or skeptical</em> — it never
-        changes the candidate's overall score. Two equally well-written candidates score equally well no matter what they believe.</p>
-        <p>What actually moves the number: whether the slogan is memorable, whether the old job supports the chosen issue,
-        whether the description is specific instead of generic, and whether the pieces contradict each other. A nurse running
-        on healthcare starts with earned authority. A nurse running on national security has to build it.</p>
+      <div class="card card-pad">
+        <h2>What moves the numbers</h2>
+        <ul>
+          <li><strong>Clarity.</strong> Is the message specific, or could it belong to anyone?</li>
+          <li><strong>Credibility.</strong> Does the old job support the issue? A nurse running on healthcare starts ahead.</li>
+          <li><strong>Relatability.</strong> Would a normal voter recognize this person's life?</li>
+          <li><strong>Memorability.</strong> Can someone repeat the slogan from memory?</li>
+          <li><strong>Coherence.</strong> Do the age, job, state, issue and personality tell one story?</li>
+        </ul>
       </div>
 
-      <div class="grid grid-3 mt-2">
-        <div class="card feature-card">
-          <img class="feature-icon" src="assets/svg/election-map.svg" alt="" aria-hidden="true">
-          <h3>Never Identical</h3>
-          <p>Run the same candidate twice and you will get a similar verdict with different wording, different events, and slightly different numbers — the same way two real pollsters disagree.</p>
-        </div>
-        <div class="card feature-card">
-          <img class="feature-icon" src="assets/icons/vote-check.svg" alt="" aria-hidden="true">
-          <h3>Nonpartisan by Design</h3>
-          <p>The analyst is barred from praising or criticizing any real-world political position, naming any real politician, or treating one party as easier to win with than another.</p>
-        </div>
-        <div class="card feature-card">
-          <img class="feature-icon" src="assets/svg/ballot-box.svg" alt="" aria-hidden="true">
-          <h3>Works Offline Too</h3>
-          <p>If the AI cannot be reached, a built-in local model produces a full report using the same rules, so a classroom never gets stuck on a blank screen.</p>
-        </div>
+      <div class="card card-pad">
+        <h2>Party never changes the score</h2>
+        <p>No party or issue is treated as more popular or more electable than another. A party label changes which
+        voter groups start friendly, and nothing else. Two equally well written candidates score the same no matter
+        what they believe.</p>
+        <p>This is tested, not just promised. Change only a candidate's party and the headline number does not move.</p>
       </div>
 
-      <div class="card card-pad mt-2">
-        <h2 style="font-size:1.4rem;">This is fiction</h2>
-        <p>Every voter, poll, percentage, and campaign event in this site is invented. Nothing here describes, predicts,
-        or comments on a real election, a real person, or a real political party. Real polling involves sampling thousands
-        of actual people, weighting for turnout, and reporting a margin of error. This is a story generator that looks like
-        a poll — useful for learning what the pieces of a campaign are, useless for predicting anything.</p>
+      <div class="card card-pad">
+        <h2>If the AI is unavailable</h2>
+        <p>A built-in offline model produces a full report using the same rules, so the page always works. It tells
+        you when that happens.</p>
       </div>
 
-      <div class="text-center mt-2">
-        <a class="btn gold" href="create.html">Start Building Your Candidate</a>
+      <div class="card card-pad">
+        <h2>This is fiction</h2>
+        <p>Every voter, poll and event is invented. Real polling surveys thousands of actual people and reports a
+        margin of error. This is a teaching tool for learning the parts of a campaign, not a way to predict anything.</p>
       </div>
     </div>
-  </section>
+
+    <div class="text-center mt-3">
+      <a class="btn large" href="create.html">Create a candidate</a>
+    </div>
+  </div>
 </main>
 
 <footer class="site-footer">
   <div class="container footer-row">
-    <div class="footer-brand">Build-A-Politician</div>
-    <div class="footer-credit">Created by Van Club America • Van, Texas<br>© <span data-year></span> Build-A-Politician.</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="create.html">Create</a></li>
+      <li><a href="opponent.html">Opponents</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <p class="footer-note">A fictional simulation.</p>
   </div>
 </footer>
 

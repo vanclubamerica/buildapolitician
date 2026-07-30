@@ -1,11 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 110" role="img" aria-label="Campaign bunting">
-  <path d="M6 16 q84 30 164 26 q84-4 164-26" fill="none" stroke="#d4af37" stroke-width="3"/>
-  <g>
-    <path d="M28 24 l30 4 -13 34 Z" fill="#c8102e"/>
-    <path d="M74 30 l30 3 -12 35 Z" fill="#f7f8fb"/>
-    <path d="M120 34 l30 2 -11 36 Z" fill="#1f4e79"/>
-    <path d="M166 36 l30 0 -12 36 Z" fill="#c8102e"/>
-    <path d="M212 34 l30-2 -14 36 Z" fill="#f7f8fb"/>
-    <path d="M258 30 l30-3 -15 35 Z" fill="#1f4e79"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 100" role="img" aria-label="Bunting">
+  <path d="M8 18 q82 28 162 24 q82-4 162-24" fill="none" stroke="#233c56" stroke-width="2.5"/>
+  <path d="M30 26 l28 4 -12 32 Z" fill="#b22234"/>
+  <path d="M76 32 l28 3 -11 33 Z" fill="#233c56"/>
+  <path d="M122 36 l28 2 -10 34 Z" fill="#b22234"/>
+  <path d="M168 38 l28 0 -11 34 Z" fill="#233c56"/>
+  <path d="M214 36 l28-2 -13 34 Z" fill="#b22234"/>
+  <path d="M260 32 l28-3 -14 33 Z" fill="#233c56"/>
 </svg>

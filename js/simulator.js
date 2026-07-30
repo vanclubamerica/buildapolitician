@@ -1,5 +1,5 @@
 /* =========================================================================
-   simulator.js — the AI Election Simulator page.
+   simulator.js: the AI Election Simulator page.
 
    Flow:
      1. Load the saved candidate (and optional opponent) from localStorage.
@@ -14,16 +14,14 @@
 
 const API_ENDPOINT = "/api/simulate";
 
-/* Rotating status lines while the model thinks — a request takes a few
+/* Rotating status lines while the model thinks. A request takes a few
    seconds and a static spinner feels broken. */
 const STATUS_LINES = [
-  "Contacting the polling analyst…",
-  "Reading the candidate profile…",
-  "Assembling a sample of fictional voters…",
-  "Running the head-to-head matchup…",
-  "Breaking results down by age, lean, and location…",
-  "Writing up strengths and weaknesses…",
-  "Reviewing the campaign timeline…"
+  "Reading the profile",
+  "Polling voters",
+  "Running the matchup",
+  "Breaking down the groups",
+  "Writing the report"
 ];
 
 let statusTimer = null;
@@ -33,14 +31,14 @@ function el(id) { return document.getElementById(id); }
 
 /* ------------------------------ matchup ------------------------------- */
 
-/* A stand-in card for when the student has not chosen an opponent — the
+/* A stand-in card for when the student has not chosen an opponent. The
    analyst will invent one. */
 function placeholderOpponent() {
   return {
-    name: "AI-Chosen Opponent",
-    party: "To be decided",
-    slogan: "The analyst will invent a credible rival",
-    age: "—", state: "—", occupation: "—", topIssue: "—",
+    name: "Opponent",
+    party: "Chosen automatically",
+    slogan: "",
+    age: "", state: "", occupation: "", topIssue: "",
     logoColor: "#4a5670"
   };
 }
@@ -56,39 +54,37 @@ function renderReadiness(candidate, opponent) {
   const note = el("readinessNote");
 
   if (missing.length) {
-    note.innerHTML = `Your profile is <strong>${done} of ${total}</strong> complete. Missing: ` +
-      CandidateUI.escape(missing.map(m => m.label).join(", ")) +
-      `. You can run it anyway, but a thin profile gets a thin report.`;
+    note.textContent = `${done} of ${total} fields filled. You can run it now, but a thin profile gets a thin report.`;
   } else {
-    note.innerHTML = opponent
-      ? `Profile complete, running against <strong>${CandidateUI.escape(opponent.name)}</strong>.`
-      : `Profile complete. No opponent chosen, so the analyst will invent a credible one.`;
+    note.textContent = opponent
+      ? `Running against ${opponent.name}.`
+      : "No opponent picked, so one will be chosen for you.";
   }
 
-  el("oppLink").textContent = opponent ? "Change Opponent" : "Choose an Opponent";
+  el("oppLink").textContent = opponent ? "Change opponent" : "Pick an opponent";
 }
 
 /* ------------------------------ thinking ------------------------------ */
 
 function startThinking() {
-  el("launchPanel").style.display = "none";
+  el("runPanel").style.display = "none";
   el("resultBlock").classList.remove("active");
-  el("aiThinking").classList.add("active");
+  el("thinking").classList.add("active");
   el("simError").textContent = "";
 
   let index = 0;
-  el("aiStatus").textContent = STATUS_LINES[0];
+  el("thinkingText").textContent = STATUS_LINES[0];
   statusTimer = setInterval(() => {
     index = (index + 1) % STATUS_LINES.length;
-    el("aiStatus").textContent = STATUS_LINES[index];
+    el("thinkingText").textContent = STATUS_LINES[index];
   }, 1800);
 }
 
 function stopThinking() {
   clearInterval(statusTimer);
   statusTimer = null;
-  el("aiThinking").classList.remove("active");
-  el("launchPanel").style.display = "";
+  el("thinking").classList.remove("active");
+  el("runPanel").style.display = "";
 }
 
 /* ------------------------------- running ------------------------------ */
@@ -133,7 +129,7 @@ async function runSimulation() {
   playBlip(440, 0.14, "triangle");
 
   /* Keep the animation on screen long enough to read, even on a fast
-     response — otherwise it flashes and looks like a glitch. */
+     response, otherwise it flashes and looks like a glitch. */
   const minimumWait = new Promise(resolve => setTimeout(resolve, 1600));
   let result;
 
@@ -144,9 +140,9 @@ async function runSimulation() {
     await minimumWait;
     result = err && err.message === "no-backend"
       ? runOffline(candidate, opponent,
-          "This copy of the site is running without the AI backend, so the built-in offline model produced these numbers. Deploy to Vercel with an OPENAI_API_KEY to get the AI analyst.")
+          "Running without the AI backend. These numbers come from the built-in offline model.")
       : runOffline(candidate, opponent,
-          "The AI analyst could not be reached, so the built-in offline model produced these numbers.");
+          "The AI analyst could not be reached. These numbers come from the built-in offline model.");
   }
 
   result.ranAt = new Date().toISOString();
@@ -156,7 +152,7 @@ async function runSimulation() {
 
   stopThinking();
   el("runBtn").disabled = false;
-  el("runBtn").textContent = "⚡ Run Simulation Again";
+  el("runBtn").textContent = "Run again";
   running = false;
 
   Report.render(el("reportRoot"), result);
@@ -196,7 +192,7 @@ function initSimulatorPage() {
   if (previous && previous.poll_results) {
     Report.render(el("reportRoot"), previous);
     el("resultBlock").classList.add("active");
-    el("runBtn").textContent = "⚡ Run Simulation Again";
+    el("runBtn").textContent = "Run again";
   }
 }
 

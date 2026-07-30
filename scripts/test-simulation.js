@@ -90,17 +90,17 @@ check("every prebuilt topIssue is a real issue", GameData.PREBUILT_POLITICIANS.e
 check("every prebuilt state is a real state", GameData.PREBUILT_POLITICIANS.every(p =>
   GameData.US_STATE_LIST.indexOf(p.state) !== -1));
 
-console.log("\noffline engine — worked example");
+console.log("\noffline engine: worked example");
 validateShape(SimEngine.simulate({ candidate: EXAMPLE }), "John Carter");
 
-console.log("\noffline engine — edge cases");
+console.log("\noffline engine: edge cases");
 validateShape(SimEngine.simulate({ candidate: { name: "Empty Ed" } }), "almost-empty profile");
 validateShape(SimEngine.simulate({
   candidate: EXAMPLE,
   opponent: GameData.PREBUILT_POLITICIANS[0]
 }), "with a named opponent");
 
-console.log("\noffline engine — determinism and variety");
+console.log("\noffline engine: determinism and variety");
 const runA = SimEngine.simulate({ candidate: EXAMPLE, seed: "x" });
 const runB = SimEngine.simulate({ candidate: EXAMPLE, seed: "x" });
 const runC = SimEngine.simulate({ candidate: EXAMPLE, seed: "y" });
@@ -110,10 +110,10 @@ check("different seed gives a different poll",
   runA.poll_results.candidate !== runC.poll_results.candidate ||
   runA.approval_rating.approve !== runC.approval_rating.approve);
 
-console.log("\noffline engine — political neutrality");
+console.log("\noffline engine: political neutrality");
 /* The core fairness guarantee: take one profile and change NOTHING but the
    party label. The headline poll number must not move at all. What may
-   move is which voter blocs start friendly — that is the point. */
+   move is which voter blocs start friendly: that is the point. */
 const parties = ["Democrat", "Republican", "Independent", "Libertarian", "Green"];
 const runs = parties.map(party =>
   SimEngine.simulate({ candidate: Object.assign({}, EXAMPLE, { party: party }), seed: "neutral" })
@@ -147,7 +147,7 @@ check("a nurse polls better on healthcare than on national security",
 check("the fit is explained in the strengths list",
   nurseHealth.strengths.concat(nurseHealth.weaknesses).some(s => /résumé/i.test(s.title)));
 
-console.log("\noffline engine — all 25 prebuilt candidates");
+console.log("\noffline engine: all 25 prebuilt candidates");
 let allValid = true;
 GameData.PREBUILT_POLITICIANS.forEach(p => {
   const r = SimEngine.simulate({ candidate: p });
@@ -195,7 +195,7 @@ function mockRes() {
   await handler({ method: "OPTIONS", headers: {} }, preflight);
   check("answers CORS preflight", preflight.statusCode === 204);
 
-  console.log("\napi/simulate.js — response repair");
+  console.log("\napi/simulate.js: response repair");
   const repaired = handler.normaliseResult({
     poll_results: { candidate: 60, opponent: 50, undecided: 10 },     // sums to 120
     approval_rating: { approve: 70, disapprove: 20, unsure: 20 },     // sums to 110
@@ -217,7 +217,7 @@ function mockRes() {
   check("clamps out-of-range event impact", Math.abs(repaired.events[0].impact) <= 8);
   check("replaces an invalid projection", repaired.projection !== "TOTALLY MADE UP");
 
-  console.log("\napi/simulate.js — input sanitising");
+  console.log("\napi/simulate.js: input sanitising");
   const dirty = handler.cleanCandidate({
     name: "  Spaced   Out  ",
     about: "x".repeat(5000),
@@ -229,12 +229,12 @@ function mockRes() {
   check("clamps an absurd age", dirty.age === 120);
   check("drops non-string fields", dirty.party === "");
 
-  console.log("\napi/_prompt.js — schema hygiene");
+  console.log("\napi/_prompt.js: schema hygiene");
   const schema = JSON.stringify(handler.stripUnsupported(require("../api/_prompt.js").RESPONSE_SCHEMA));
   check("strips keywords OpenAI strict mode rejects", !/"minimum"|"maximum"/.test(schema));
   check("keeps enums", schema.indexOf("enum") !== -1);
   check("keeps additionalProperties:false", schema.indexOf('"additionalProperties":false') !== -1);
 
-  console.log("\n" + (failed === 0 ? "PASS" : "FAIL") + " — " + passed + " passed, " + failed + " failed\n");
+  console.log("\n" + (failed === 0 ? "PASS" : "FAIL") + ": " + passed + " passed, " + failed + " failed\n");
   process.exit(failed === 0 ? 0 : 1);
 })();

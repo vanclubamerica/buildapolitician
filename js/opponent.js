@@ -1,10 +1,10 @@
 /* =========================================================================
-   opponent.js — Choose Opponent page (optional step).
+   opponent.js: Choose Opponent page (optional step).
 
    Two ways to set an opponent: pick one of the 25 fictional pre-built
    politicians, or build a custom one. Both produce the same candidate
    schema the builder produces, so the simulator treats them identically.
-   Leaving this page untouched is fine — the analyst invents a rival.
+   Leaving this page untouched is fine. The analyst invents a rival.
    ========================================================================= */
 
 let opponent = CandidateUI.blank();
@@ -32,7 +32,7 @@ function refreshCurrentOpponent() {
   const bar = oppEl("currentOpponent");
   if (saved && saved.name) {
     bar.style.display = "";
-    oppEl("currentOpponentName").textContent = saved.name + " — " + (saved.party || "Independent");
+    oppEl("currentOpponentName").textContent = saved.name + ", " + (saved.party || "Independent");
   } else {
     bar.style.display = "none";
   }
@@ -66,19 +66,15 @@ function renderRoster(filter) {
   list.forEach(p => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "card opponent-card card-hover";
+    card.className = "opponent-card";
     card.dataset.id = p.id;
     card.setAttribute("role", "listitem");
     card.innerHTML = `
       <h4>${CandidateUI.escape(p.name)}</h4>
       <span class="candidate-party">${CandidateUI.escape(p.party)}</span>
-      <p style="font-style:italic; margin:0.3rem 0 0.6rem;">"${CandidateUI.escape(p.slogan)}"</p>
-      <div class="candidate-issue-row">
-        <span class="issue-pill">${CandidateUI.issueIcon(p.topIssue)} ${CandidateUI.escape(p.topIssue)}</span>
-      </div>
-      <p style="font-size:0.78rem; margin-top:0.6rem;">
-        Age ${CandidateUI.escape(p.age)} · ${CandidateUI.escape(p.state)} · was a ${CandidateUI.escape(p.occupation)}
-      </p>`;
+      <p>${CandidateUI.escape(p.slogan)}</p>
+      <p class="mt-1"><span class="pill">${CandidateUI.escape(p.topIssue)}</span></p>
+      <p class="mt-1">Age ${CandidateUI.escape(p.age)}, ${CandidateUI.escape(p.state)}, was a ${CandidateUI.escape(p.occupation)}</p>`;
     card.addEventListener("click", () => {
       Storage.save(Storage.KEY_OPPONENT, p);
       refreshCurrentOpponent();
@@ -187,15 +183,15 @@ function initOpponentPage() {
     const message = oppEl("oppFormMessage");
     if (!opponent.name.trim()) {
       message.textContent = "Give your opponent a name first.";
-      message.style.color = "var(--red-400)";
+      message.className = "form-msg error";
       return;
     }
     opponent.id = opponent.name.toLowerCase().replace(/[^a-z]+/g, "-");
     opponent.prebuilt = false;
     Storage.save(Storage.KEY_OPPONENT, opponent);
     refreshCurrentOpponent();
-    message.textContent = `${opponent.name} saved as your opponent.`;
-    message.style.color = "#6be089";
+    message.textContent = `${opponent.name} saved.`;
+    message.className = "form-msg ok";
     playBlip(720, 0.15, "triangle");
   });
 

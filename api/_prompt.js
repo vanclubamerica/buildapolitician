@@ -15,7 +15,7 @@ Read one fictional candidate profile and produce a realistic-feeling public opin
 THE ONLY EVIDENCE YOU HAVE
 The student's candidate profile: name, age, party, occupation before politics, home state, top issue, campaign slogan, and the "About" paragraph. If an opponent profile is supplied, use it too. You have nothing else. Do not invent policy positions the student did not write, and do not assume what a candidate believes just because of their party label.
 
-HOW TO REASON — this matters most
+HOW TO REASON (this matters most)
 Base your numbers on the CRAFT of the candidate, never on ideology:
 - Clarity: is the message specific, or vague and interchangeable?
 - Credibility: does the background support the issue they chose? (A nurse running on healthcare starts with earned authority; a nurse running on national security has to build it.)
@@ -24,7 +24,7 @@ Base your numbers on the CRAFT of the candidate, never on ideology:
 - Coherence: do the age, occupation, state, issue, and personality tell one consistent story, or do they contradict each other?
 - Tradeoffs: every strength has a cost. A blunt candidate gains trust and loses moderates. A cautious candidate gains moderates and loses enthusiasm. Say so.
 
-STRICT POLITICAL NEUTRALITY — non-negotiable
+STRICT POLITICAL NEUTRALITY (non-negotiable)
 - No party, ideology, or issue position is inherently more popular, more moral, or more electable than another. Democrat, Republican, Independent, Libertarian, Green, and invented parties all start from the same place.
 - A party label may change WHICH voter blocs start friendly or skeptical. It must NEVER change the candidate's overall score.
 - If you would write a sentence praising or criticizing a real-world political position, delete it.
@@ -38,11 +38,15 @@ REALISM RULES
 - Demographic support numbers are the percentage of THAT GROUP supporting the candidate. They do not need to add up to anything, but they should cluster within roughly 25 points of the headline number unless there is a clear reason in the profile.
 - Nobody is loved by everyone. Every candidate must have real weaknesses, including excellent ones.
 
-WRITING STYLE
+WRITING STYLE (follow exactly)
 - Write like an analyst briefing a newsroom: plain, specific, a little dry.
+- Be SHORT. Detail fields are two sentences, three at the absolute most. Titles are three to five words. The summary is three sentences.
 - Always explain WHY a number is what it is, pointing at something the student actually wrote.
 - Second person is banned. Refer to the candidate by last name.
-- Age 14-18 reading level. No jargon without explanation. No emoji.
+- Age 14-18 reading level. No jargon without explanation.
+- NEVER use em dashes. Use a period, a comma, or a colon instead.
+- No emoji. No exclamation marks. No marketing language. No filler openers like "Overall" or "It is important to note".
+- Do not hedge with "may", "could potentially", or "arguably" more than once in the whole report.
 - Campaign events must be plausible things that happen in campaigns (debates, endorsements, gaffes, ad buys, interviews, local crises), not disasters or scandals involving crimes.`;
 
 /* Structured Outputs schema. `strict: true` requires every property to be
@@ -102,7 +106,7 @@ const RESPONSE_SCHEMA = {
         required: ["headline", "detail", "impact", "affected"],
         properties: {
           headline: { type: "string", description: "Short news-style headline, under 8 words." },
-          detail: { type: "string", description: "Two or three sentences describing what happened and how polling moved." },
+          detail: { type: "string", description: "One or two short sentences: what happened and how polling moved. No em dashes." },
           impact: { type: "integer", minimum: -8, maximum: 8, description: "Percentage-point swing for the candidate. Negative means it hurt them." },
           affected: { type: "string", description: "Which voter group moved, e.g. 'Moderate voters' or 'Rural voters'." }
         }
@@ -110,7 +114,7 @@ const RESPONSE_SCHEMA = {
     },
     analyst_summary: {
       type: "string",
-      description: "One paragraph, 3-5 sentences, explaining the overall result and why it came out this way."
+      description: "Three short sentences explaining the result and why it came out this way. No em dashes."
     }
   }
 };
@@ -123,7 +127,7 @@ function demoItem(groupHint) {
     properties: {
       group: { type: "string", description: "Exactly one of: " + groupHint },
       support: { type: "integer", minimum: 0, maximum: 100, description: "Percent of this group supporting the candidate." },
-      note: { type: "string", description: "One sentence explaining why this group lands where it does." }
+      note: { type: "string", description: "One short sentence on why this group lands here. No em dashes." }
     }
   };
 }
@@ -135,7 +139,7 @@ function pointItem(hint) {
     required: ["title", "detail"],
     properties: {
       title: { type: "string", description: "Three to five words." },
-      detail: { type: "string", description: hint + " Two or three sentences, grounded in the profile." }
+      detail: { type: "string", description: hint + " Two short sentences, grounded in the profile. No em dashes." }
     }
   };
 }
@@ -174,14 +178,14 @@ function buildUserPrompt(candidate, opponent) {
     lines.push(
       "",
       "OPPONENT",
-      "No opponent was chosen. Invent a credible fictional opponent with a fictional name who is a realistic threat — not a strawman, and not from a party you consider worse. Give them a plausible background and state their name in opponent_name."
+      "No opponent was chosen. Invent a credible fictional opponent with a fictional name who is a realistic threat, not a strawman, and not from a party you consider worse. Give them a plausible background and state their name in opponent_name."
     );
   }
 
   lines.push(
     "",
     "TASK",
-    "Produce the full polling report. Give 3-5 strengths, 3-5 weaknesses, and 4-6 campaign events. Remember: the numbers must reflect how well this candidate is CONSTRUCTED, never which politics they hold. Verify before answering that approve + disapprove + unsure = 100 and candidate + opponent + undecided = 100."
+    "Produce the full polling report. Give 3-5 strengths, 3-5 weaknesses, and 4-6 campaign events. Keep every piece of writing short. Remember: the numbers must reflect how well this candidate is CONSTRUCTED, never which politics they hold. Verify before answering that approve + disapprove + unsure = 100 and candidate + opponent + undecided = 100."
   );
 
   return lines.join("\n");

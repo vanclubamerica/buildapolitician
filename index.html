@@ -1,151 +1,91 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Build-A-Politician — Design a Candidate, Run the Election</title>
-<meta name="description" content="Design a fictional candidate, choose an opponent, and simulate a full election night with Build-A-Politician.">
+<title>Build-A-Politician</title>
+<meta name="description" content="Create a politician. Run an election. See the results.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-
-<div class="loading-screen" aria-hidden="true">
-  <div class="loading-seal"></div>
-  <span class="loading-text">Counting the early votes…</span>
-</div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Loading</span></div>
 
 <header class="site-header">
   <div class="container nav-row">
-    <a class="brand" href="index.html">
-      <img class="brand-mark" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true">
-      Build-A-Politician
-    </a>
+    <a class="brand" href="index.html"><img class="brand-mark" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true">Build-A-Politician</a>
     <nav aria-label="Primary">
       <ul class="nav-links">
         <li><a href="index.html" aria-current="page">Home</a></li>
-        <li><a href="create.html">Create Politician</a></li>
-        <li><a href="opponent.html">Choose Opponent</a></li>
-        <li><a href="simulator.html">Election Simulator</a></li>
-        <li><a href="results.html">Results</a></li>
+        <li><a href="create.html">Create Candidate</a></li>
+        <li><a href="simulator.html">Simulator</a></li>
         <li><a href="how-it-works.html">How It Works</a></li>
-        <li><a href="about.html">About</a></li>
       </ul>
     </nav>
     <div class="nav-tools">
-      <button class="icon-toggle" data-sound-toggle title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
-      <button class="icon-toggle" data-music-toggle title="Toggle background music" aria-label="Toggle background music">🎵</button>
-      <button class="theme-pill" data-theme-toggle aria-pressed="false">
-        <span aria-hidden="true">🌓</span><span class="theme-label">Dark Mode</span>
-      </button>
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <button class="theme-pill" data-theme-toggle aria-pressed="false">Dark</button>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     </div>
   </div>
 </header>
 
 <main id="main">
   <section class="hero">
-    <img class="hero-bg" src="assets/backgrounds/hero-bg.svg" alt="" aria-hidden="true">
     <div class="container hero-inner">
       <div>
-        <p class="eyebrow">A fictional political strategy simulator</p>
-        <h1 class="hero-title">Build-A-<span class="accent">Politician</span></h1>
-        <p class="hero-sub">Design your own fictional candidate, then send them to an AI polling analyst who reports back with approval ratings, poll numbers, and a full voter breakdown.</p>
+        <h1>Create a politician.<br>Run an election.<br>See the results.</h1>
+        <p>Design a candidate, then find out how voters respond.</p>
         <div class="hero-actions">
-          <a class="btn" href="create.html">Start Building</a>
-          <a class="btn secondary" href="how-it-works.html">How It Works</a>
-        </div>
-        <div class="hero-stat-row">
-          <div class="hero-stat"><b>8</b><span>Fields to Fill</span></div>
-          <div class="hero-stat"><b>25</b><span>Rival Candidates</span></div>
-          <div class="hero-stat"><b>11</b><span>Voter Groups Polled</span></div>
-          <div class="hero-stat"><b>∞</b><span>Unique Reports</span></div>
+          <a class="btn large" href="create.html">Start</a>
+          <a class="btn secondary large" href="how-it-works.html">How it works</a>
         </div>
       </div>
-      <div class="podium-scene float-anim">
-        <img src="assets/svg/podium.svg" alt="Illustration of a debate podium with a microphone" width="320">
-      </div>
+      <img class="hero-art" src="assets/svg/podium.svg" alt="" aria-hidden="true" width="300">
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <p class="eyebrow">The Campaign Trail</p>
-        <h2>Everything a Campaign Needs</h2>
-        <p>From the first slogan to the final electoral count, every stage of the race is simulated.</p>
-      </div>
-      <div class="grid grid-4">
-        <div class="card feature-card card-hover">
-          <img class="feature-icon" src="assets/svg/ballot-box.svg" alt="" aria-hidden="true">
-          <h3>Build a Candidate</h3>
-          <p>Name, age, party, old job, home state, top issue, slogan, and the story of who they are — in a character creator, not a form.</p>
+  <section class="band">
+    <div class="container section">
+      <div class="steps">
+        <div class="card step">
+          <div class="step-num">1</div>
+          <h3>Build</h3>
+          <p>Pick a name, party, background, home state and the one issue they run on.</p>
         </div>
-        <div class="card feature-card card-hover">
-          <img class="feature-icon" src="assets/icons/vote-check.svg" alt="" aria-hidden="true">
-          <h3>Pick a Rival</h3>
-          <p>Face a custom opponent or one of 25 fictional politicians — or skip it and let the analyst invent one.</p>
+        <div class="card step">
+          <div class="step-num">2</div>
+          <h3>Simulate</h3>
+          <p>Voters weigh in. You get approval numbers, polling and a group breakdown.</p>
         </div>
-        <div class="card feature-card card-hover">
-          <img class="feature-icon" src="assets/svg/election-map.svg" alt="" aria-hidden="true">
-          <h3>Run the AI Simulation</h3>
-          <p>An AI polling analyst reads the whole profile and reports approval, head-to-head polling, and the campaign events that moved it.</p>
-        </div>
-        <div class="card feature-card card-hover">
-          <img class="feature-icon" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true">
-          <h3>Full Voter Breakdown</h3>
-          <p>Support by age, political lean, and location — plus honest strengths and weaknesses, with reasons for every number.</p>
+        <div class="card step">
+          <div class="step-num">3</div>
+          <h3>Adjust</h3>
+          <p>Change one thing, run it again, and see which numbers move.</p>
         </div>
       </div>
     </div>
   </section>
 
   <section class="section">
-    <div class="container">
-      <div class="card card-pad two-col">
-        <div>
-          <p class="eyebrow">Step by step</p>
-          <h2>From Announcement to Election Night</h2>
-          <ol class="numbered-steps">
-            <li><span class="step-num">01</span><div><strong>Build your candidate.</strong> Eight choices, including a short description of who they actually are.</div></li>
-            <li><span class="step-num">02</span><div><strong>Choose an opponent.</strong> Optional — skip it and the AI invents a credible rival.</div></li>
-            <li><span class="step-num">03</span><div><strong>Run the simulation.</strong> An AI polling analyst reads the profile and reports back.</div></li>
-            <li><span class="step-num">04</span><div><strong>Change one thing, run it again.</strong> Watch which numbers move and figure out why.</div></li>
-          </ol>
-        </div>
-        <div class="float-anim">
-          <img src="assets/svg/banner.svg" alt="Campaign bunting banner illustration">
-          <img src="assets/svg/capitol.svg" alt="Silhouette of a capitol building" style="margin-top:1.5rem;">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container card card-pad text-center">
-      <p class="eyebrow">Ready when you are</p>
-      <h2>Your Campaign Starts Now</h2>
-      <p class="section-head" style="margin-bottom:1.6rem;">No sign-up and nothing to install. Your candidate is saved in your own browser, and only the profile you write is ever sent anywhere.</p>
-      <a class="btn gold" href="create.html">Build Your Politician</a>
+    <div class="container narrow text-center">
+      <h2>Ready?</h2>
+      <p>Nothing to install. Your candidate saves in this browser.</p>
+      <a class="btn large mt-1" href="create.html">Create a candidate</a>
     </div>
   </section>
 </main>
 
 <footer class="site-footer">
   <div class="container footer-row">
-    <div>
-      <div class="footer-brand">Build-A-Politician</div>
-      <ul class="footer-links mt-2">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="how-it-works.html">How It Works</a></li>
-      </ul>
-    </div>
-    <div class="footer-credit">
-      Created by Van Club America • Van, Texas<br>
-      © <span data-year></span> Build-A-Politician. A fictional simulation for entertainment purposes only.
-    </div>
+    <ul class="footer-links">
+      <li><a href="create.html">Create</a></li>
+      <li><a href="opponent.html">Opponents</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="how-it-works.html">How it works</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <p class="footer-note">A fictional simulation. Van Club America, Van, Texas.</p>
   </div>
 </footer>
 

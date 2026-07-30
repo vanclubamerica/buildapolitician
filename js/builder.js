@@ -1,5 +1,5 @@
 /* =========================================================================
-   builder.js — Create Politician page.
+   builder.js: Create Politician page.
 
    Keeps one `candidate` object in memory, mirrors it onto the preview card
    and the completion rail, and persists it to localStorage. Shared card /
@@ -35,8 +35,8 @@ function refreshCompletion() {
   const cta = document.getElementById("toSimBtn");
   if (cta) {
     cta.textContent = done === total
-      ? "⚡ Run Election Simulation →"
-      : `⚡ Run Simulation (${done}/${total} done)`;
+      ? "Run the simulation"
+      : `Run the simulation (${done}/${total})`;
   }
 }
 
@@ -90,7 +90,7 @@ function renderPartyTiles() {
   );
 }
 
-/* Which party tile should read as selected — the named one, or Custom. */
+/* Which party tile should read as selected: the named one, or Custom. */
 function partySelection() {
   if (!candidate.party) return "";
   const known = GameData.PARTIES.some(p => p.value === candidate.party);
@@ -171,7 +171,7 @@ function insertStarter(starter) {
 }
 
 /* A prompt counts as "used" once enough sentences exist to cover it. This
-   is a nudge, not a grade — students can write however they like. */
+   is a nudge, not a grade. Students can write however they like. */
 function markUsedPrompts() {
   const sentences = CandidateUI.sentenceCount(candidate.about);
   document.querySelectorAll("#aboutPrompts .prompt-chip").forEach(chip => {
@@ -191,10 +191,10 @@ function updateSentenceMeter() {
 
   const status = document.getElementById("sentenceStatus");
   const word = count === 1 ? "sentence" : "sentences";
-  if (count === 0)      { status.textContent = "0 sentences — aim for 3 to 5"; status.className = "sentence-status"; }
-  else if (count < 3)   { status.textContent = `${count} ${word} — keep going, 3 is the minimum`; status.className = "sentence-status warn"; }
-  else if (count <= 5)  { status.textContent = `${count} ${word} — that is the sweet spot`; status.className = "sentence-status good"; }
-  else                  { status.textContent = `${count} ${word} — plenty. The analyst reads all of it.`; status.className = "sentence-status good"; }
+  if (count === 0)      { status.textContent = "Aim for 3 to 5 sentences"; status.className = "meter-note"; }
+  else if (count < 3)   { status.textContent = `${count} ${word}. Keep going, 3 is the minimum`; status.className = "meter-note warn"; }
+  else if (count <= 5)  { status.textContent = `${count} ${word}. Good length`; status.className = "meter-note good"; }
+  else                  { status.textContent = `${count} ${word}. Plenty to work with`; status.className = "meter-note good"; }
 
   markUsedPrompts();
 }
@@ -204,7 +204,7 @@ function updateSentenceMeter() {
 function showFormMessage(msg, isError) {
   const el = document.getElementById("formMessage");
   el.textContent = msg;
-  el.style.color = isError ? "var(--red-400)" : "#6be089";
+  el.className = "form-msg " + (isError ? "error" : "ok");
 }
 
 function applyCandidate(next, message) {
@@ -267,7 +267,7 @@ function randomizeCandidate() {
       `Supporters find ${first} ${pick(GameData.RANDOM_VIEWS)}.`
     ].join(" "),
     logoColor: pick(GameData.LOGO_COLOR_PALETTE)
-  }, "Random candidate generated. Edit anything you like.");
+  }, "Random candidate ready.");
 }
 
 function downloadCandidate() {
@@ -335,18 +335,16 @@ function initBuilderPage() {
   document.getElementById("randomCandidateBtn").addEventListener("click", randomizeCandidate);
 
   document.getElementById("exampleBtn").addEventListener("click", () => {
-    applyCandidate(GameData.EXAMPLE_CANDIDATE,
-      "Loaded the example candidate. Change anything — it is only a starting point.");
+    applyCandidate(GameData.EXAMPLE_CANDIDATE, "Example loaded. Change anything you like.");
   });
 
   document.getElementById("saveBtn").addEventListener("click", () => {
     const missing = CandidateUI.REQUIRED.filter(f => !CandidateUI.isFilled(candidate, f.key));
     Storage.save(Storage.KEY_PLAYER, candidate);
     if (missing.length) {
-      showFormMessage("Saved, but still empty: " + missing.map(m => m.label).join(", ") +
-        ". The simulation works best with everything filled in.", true);
+      showFormMessage("Saved. Still empty: " + missing.map(m => m.label).join(", ") + ".", true);
     } else {
-      showFormMessage("Candidate saved. Head to the Election Simulator whenever you are ready.", false);
+      showFormMessage("Candidate saved.", false);
       playBlip(720, 0.15, "triangle");
       launchConfetti(document.querySelector(".confetti-layer"), 40);
     }
@@ -362,7 +360,7 @@ function initBuilderPage() {
       try {
         applyCandidate(JSON.parse(reader.result), "Candidate loaded from file.");
       } catch (err) {
-        showFormMessage("That file could not be read as a candidate JSON.", true);
+        showFormMessage("That file could not be read.", true);
       }
     };
     reader.readAsText(file);
@@ -370,12 +368,12 @@ function initBuilderPage() {
   });
 
   document.getElementById("resetBtn").addEventListener("click", () => {
-    if (!confirm("Reset the builder? This clears every field.")) return;
+    if (!confirm("Clear every field?")) return;
     Storage.remove(Storage.KEY_PLAYER);
     Storage.remove(Storage.KEY_RESULT);
     candidate = CandidateUI.blank();
     syncAllInputs();
-    showFormMessage("Builder reset.", false);
+    showFormMessage("Reset.", false);
   });
 
   document.getElementById("printBtn").addEventListener("click", () => window.print());

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Results — Build-A-Politician</title>
-<meta name="description" content="The full breakdown of your fictional candidate's simulated election: approval, polling, voter groups, strengths, weaknesses, and campaign events.">
+<title>Results | Build-A-Politician</title>
+<meta name="description" content="The full breakdown of your candidate's simulated election.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Counting the final ballots…</span></div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Loading</span></div>
 <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -19,73 +19,64 @@
     <nav aria-label="Primary">
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="create.html">Create Politician</a></li>
-        <li><a href="opponent.html">Choose Opponent</a></li>
-        <li><a href="simulator.html">Election Simulator</a></li>
-        <li><a href="results.html" aria-current="page">Results</a></li>
+        <li><a href="create.html">Create Candidate</a></li>
+        <li><a href="simulator.html">Simulator</a></li>
         <li><a href="how-it-works.html">How It Works</a></li>
-        <li><a href="about.html">About</a></li>
       </ul>
     </nav>
     <div class="nav-tools">
-      <button class="icon-toggle" data-sound-toggle title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
-      <button class="icon-toggle" data-music-toggle title="Toggle background music" aria-label="Toggle background music">🎵</button>
-      <button class="theme-pill" data-theme-toggle aria-pressed="false"><span aria-hidden="true">🌓</span><span class="theme-label">Dark Mode</span></button>
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <button class="theme-pill" data-theme-toggle aria-pressed="false">Dark</button>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="section" style="padding-top:2.5rem;">
-    <div class="container">
-      <p class="eyebrow">Step 3 of 3 — Results</p>
+  <div class="container section-tight">
 
-      <!-- Nothing run yet -->
-      <div class="card card-pad mt-2" id="resultsMissing" style="display:none;">
-        <h2 style="font-size:1.3rem;">No simulation yet</h2>
-        <p>Build a candidate and run the election simulation, and the full breakdown will land here.</p>
-        <div class="hero-actions">
-          <a class="btn" href="create.html">Create Your Politician</a>
-          <a class="btn secondary" href="simulator.html">Go to the Simulator</a>
+    <div class="card empty" id="resultsMissing" style="display:none;">
+      <h2>No results yet</h2>
+      <p>Run the simulation and the breakdown lands here.</p>
+      <div class="button-row" style="justify-content:center;">
+        <a class="btn" href="simulator.html">Go to the simulator</a>
+        <a class="btn secondary" href="create.html">Create a candidate</a>
+      </div>
+    </div>
+
+    <div id="resultsWrap" style="display:none;">
+      <div class="flex-between mb-2">
+        <div>
+          <h1 id="winnerBannerText" style="margin-bottom:.25rem;"></h1>
+          <p class="lead" id="winnerBannerSub" style="margin:0;"></p>
+          <p class="tiny mt-1" id="ranAtNote"></p>
+        </div>
+        <div class="button-row">
+          <a class="btn secondary small" href="create.html">Edit</a>
+          <a class="btn small" href="simulator.html">Run again</a>
+          <button class="btn secondary small" id="printResultsBtn">Print</button>
+          <button class="btn secondary small" id="downloadResultsBtn">Download</button>
         </div>
       </div>
 
-      <div id="resultsWrap" style="display:none;">
-        <div class="winner-banner">
-          <p class="eyebrow" id="resultEyebrow"></p>
-          <h2 id="winnerBannerText"></h2>
-          <p id="winnerBannerSub" style="margin:0;"></p>
-        </div>
-
-        <div class="two-col mb-2">
-          <div>
-            <h3>The Candidate</h3>
-            <div class="candidate-card" id="resultCandidateCard"></div>
-          </div>
-          <div>
-            <h3>What Happens Next</h3>
-            <p>Change one thing about your candidate and run it again — a sharper slogan, a different top issue, a fuller story — and watch which numbers move. That comparison is the whole point of the exercise.</p>
-            <div class="button-bar">
-              <a class="btn" href="create.html">✎ Edit Candidate</a>
-              <a class="btn gold" href="simulator.html">↻ Run It Again</a>
-              <button class="btn secondary" id="printResultsBtn">🖨 Print</button>
-              <button class="btn secondary" id="downloadResultsBtn">⬇ Download JSON</button>
-            </div>
-            <p class="mt-2" id="ranAtNote" style="font-family:var(--font-mono); font-size:0.74rem; color:var(--text-dim);"></p>
-          </div>
-        </div>
-
+      <div class="results-layout">
+        <div class="candidate-card" id="resultCandidateCard"></div>
         <div id="reportRoot"></div>
       </div>
     </div>
-  </section>
+  </div>
 </main>
 
 <footer class="site-footer">
   <div class="container footer-row">
-    <div class="footer-brand">Build-A-Politician</div>
-    <div class="footer-credit">Created by Van Club America • Van, Texas<br>© <span data-year></span> Build-A-Politician.</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="create.html">Create</a></li>
+      <li><a href="simulator.html">Simulator</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="button-row">
+      <button class="btn ghost small" data-sound-toggle aria-pressed="true">Sound: on</button>
+    </div>
   </div>
 </footer>
 

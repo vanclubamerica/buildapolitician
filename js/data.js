@@ -1,16 +1,15 @@
 /* =========================================================================
-   data.js — Build-A-Politician
+   data.js: Build-A-Politician
    All static game data for the candidate creator and the election
-   simulator. Nothing in this file touches the DOM — it is pure data plus
+   simulator. Nothing in this file touches the DOM. It is pure data plus
    a few small generator helpers.
 
-   Candidate schema (v2). Every candidate — player-built, custom opponent,
-   or pre-built roster character — uses exactly this shape:
+   Candidate schema (v2). Every candidate (player-built, custom opponent,
+   or pre-built roster character) uses exactly this shape:
 
      {
        name, age, party, occupation, state, topIssue, slogan, about,
-       logoColor, prebuilt
-     }
+       logoColor, prebuilt }
    ========================================================================= */
 
 /* -------------------------------------------------------------------------
@@ -19,59 +18,59 @@
    instructed not to advantage any one of these.
    ------------------------------------------------------------------------- */
 const PARTIES = [
-  { value: "Democrat",    icon: "🫏", blurb: "Runs on the Democratic ticket." },
-  { value: "Republican",  icon: "🐘", blurb: "Runs on the Republican ticket." },
-  { value: "Independent", icon: "🕊️", blurb: "No party. Answers to voters only." },
-  { value: "Libertarian", icon: "🗽", blurb: "Maximum personal and economic freedom." },
-  { value: "Green",       icon: "🌿", blurb: "Environment and social justice first." },
-  { value: "Custom",      icon: "✨", blurb: "Invent your own party name." }
+  { value: "Democrat", blurb: "Runs on the Democratic ticket." },
+  { value: "Republican", blurb: "Runs on the Republican ticket." },
+  { value: "Independent", blurb: "No party. Answers to voters only." },
+  { value: "Libertarian", blurb: "Maximum personal and economic freedom." },
+  { value: "Green", blurb: "Environment and social justice first." },
+  { value: "Custom", blurb: "Invent your own party name." }
 ];
 
 /* -------------------------------------------------------------------------
-   Top issues — the single thing the candidate is known for.
+   Top issues: the single thing the candidate is known for.
    ------------------------------------------------------------------------- */
 const TOP_ISSUES = [
-  { value: "Economy",               icon: "💵", blurb: "Jobs, wages, prices, taxes." },
-  { value: "Healthcare",            icon: "🏥", blurb: "Coverage, costs, prescriptions." },
-  { value: "Education",             icon: "🎓", blurb: "Schools, teachers, college costs." },
-  { value: "Immigration",           icon: "🛂", blurb: "Borders, visas, citizenship." },
-  { value: "Environment & Energy",  icon: "🌎", blurb: "Climate, power, clean water." },
-  { value: "Crime & Public Safety", icon: "🚓", blurb: "Policing, courts, safe streets." },
-  { value: "National Security",     icon: "🛡️", blurb: "Defense, alliances, cyber threats." },
-  { value: "Jobs & Workers",        icon: "🔧", blurb: "Unions, trades, manufacturing." },
-  { value: "Housing",               icon: "🏘️", blurb: "Rent, home prices, homelessness." },
-  { value: "Technology & AI",       icon: "🤖", blurb: "Innovation, privacy, automation." },
-  { value: "Government Reform",     icon: "⚖️", blurb: "Corruption, term limits, spending." },
-  { value: "Veterans",              icon: "🎖️", blurb: "Benefits, care, and jobs for vets." }
+  { value: "Economy", blurb: "Jobs, wages, prices, taxes." },
+  { value: "Healthcare", blurb: "Coverage, costs, prescriptions." },
+  { value: "Education", blurb: "Schools, teachers, college costs." },
+  { value: "Immigration", blurb: "Borders, visas, citizenship." },
+  { value: "Environment & Energy", blurb: "Climate, power, clean water." },
+  { value: "Crime & Public Safety", blurb: "Policing, courts, safe streets." },
+  { value: "National Security", blurb: "Defense, alliances, cyber threats." },
+  { value: "Jobs & Workers", blurb: "Unions, trades, manufacturing." },
+  { value: "Housing", blurb: "Rent, home prices, homelessness." },
+  { value: "Technology & AI", blurb: "Innovation, privacy, automation." },
+  { value: "Government Reform", blurb: "Corruption, term limits, spending." },
+  { value: "Veterans", blurb: "Benefits, care, and jobs for vets." }
 ];
 
 /* -------------------------------------------------------------------------
    Occupation tiles. Students can also type their own.
    ------------------------------------------------------------------------- */
 const OCCUPATIONS = [
-  { value: "Small Business Owner",  icon: "🏪" },
-  { value: "Teacher",               icon: "🍎" },
-  { value: "Doctor",                icon: "🩺" },
-  { value: "Nurse",                 icon: "💉" },
-  { value: "Military Veteran",      icon: "🎖️" },
-  { value: "Lawyer",                icon: "⚖️" },
-  { value: "Farmer",                icon: "🌾" },
-  { value: "Police Officer",        icon: "🚔" },
-  { value: "Firefighter",           icon: "🚒" },
-  { value: "Engineer",              icon: "⚙️" },
-  { value: "Software Developer",    icon: "💻" },
-  { value: "Construction Worker",   icon: "🏗️" },
-  { value: "Factory Worker",        icon: "🏭" },
-  { value: "Journalist",            icon: "📰" },
-  { value: "College Professor",     icon: "📚" },
-  { value: "Nonprofit Director",    icon: "🤝" },
-  { value: "Pastor",                icon: "⛪" },
-  { value: "Scientist",             icon: "🔬" },
-  { value: "Accountant",            icon: "🧮" },
-  { value: "Mayor",                 icon: "🏛️" },
-  { value: "Truck Driver",          icon: "🚚" },
-  { value: "Athlete",               icon: "🏈" },
-  { value: "Custom",                icon: "✏️" }
+  { value: "Small Business Owner" },
+  { value: "Teacher" },
+  { value: "Doctor" },
+  { value: "Nurse" },
+  { value: "Military Veteran" },
+  { value: "Lawyer" },
+  { value: "Farmer" },
+  { value: "Police Officer" },
+  { value: "Firefighter" },
+  { value: "Engineer" },
+  { value: "Software Developer" },
+  { value: "Construction Worker" },
+  { value: "Factory Worker" },
+  { value: "Journalist" },
+  { value: "College Professor" },
+  { value: "Nonprofit Director" },
+  { value: "Pastor" },
+  { value: "Scientist" },
+  { value: "Accountant" },
+  { value: "Mayor" },
+  { value: "Truck Driver" },
+  { value: "Athlete" },
+  { value: "Custom" }
 ];
 
 /* -------------------------------------------------------------------------
@@ -98,8 +97,7 @@ const EXAMPLE_CANDIDATE = {
   topIssue: "Economy",
   slogan: "Common Sense. Real Results.",
   about: "John Carter is a blunt, confident leader who believes politicians spend too much time arguing instead of solving problems. He built a successful business before entering politics and wants to bring a different approach to government. Supporters see him as honest and decisive, while critics see him as stubborn.",
-  logoColor: "#c8102e"
-};
+  logoColor: "#b22234" };
 
 const US_STATE_LIST = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -113,7 +111,7 @@ const US_STATE_LIST = [
   "District of Columbia"
 ];
 
-/* Rough regional grouping — used only by the offline fallback engine to
+/* Rough regional grouping, used only by the offline fallback engine to
    add a little geographic texture. No real-world political meaning. */
 const STATE_REGION = {
   "Alabama":"South","Alaska":"West","Arizona":"West","Arkansas":"South",
@@ -128,8 +126,7 @@ const STATE_REGION = {
   "Pennsylvania":"Northeast","Rhode Island":"Northeast","South Carolina":"South",
   "South Dakota":"Midwest","Tennessee":"South","Texas":"South","Utah":"West",
   "Vermont":"Northeast","Virginia":"South","Washington":"West","West Virginia":"South",
-  "Wisconsin":"Midwest","Wyoming":"West","District of Columbia":"Northeast"
-};
+  "Wisconsin":"Midwest","Wyoming":"West","District of Columbia":"Northeast" };
 
 /* Slogan generator word banks */
 const SLOGAN_OPENERS = [
@@ -146,8 +143,7 @@ const SLOGAN_CLOSERS = [
 function generateRandomSlogan() {
   const o = SLOGAN_OPENERS[Math.floor(Math.random() * SLOGAN_OPENERS.length)];
   const c = SLOGAN_CLOSERS[Math.floor(Math.random() * SLOGAN_CLOSERS.length)];
-  return o + " " + c;
-}
+  return o + " " + c; }
 
 const FIRST_NAMES = ["Alex","Jordan","Morgan","Taylor","Casey","Riley","Sam","Jamie",
   "Avery","Quinn","Reese","Emerson","Rowan","Dakota","Skyler","Elliot","Marcus",
@@ -159,10 +155,11 @@ const LAST_NAMES = ["Winters","Hale","Prescott","Reyes","Whitfield","Barnett","S
 function generateRandomName() {
   const f = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
   const l = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-  return f + " " + l;
-}
+  return f + " " + l; }
 
-const LOGO_COLOR_PALETTE = ["#c8102e", "#0a2540", "#d4af37", "#1f4e79", "#7a1f2b", "#2e6b4f", "#4a2f6b", "#b8631a"];
+/* Campaign colors. Kept muted and few so a candidate card never fights
+   the rest of the interface. */
+const LOGO_COLOR_PALETTE = ["#b22234", "#233c56", "#8e1a29", "#2f7a4d", "#4a5b8c", "#7a6a3a"];
 
 /* Personality fragments used by the "Surprise Me" random candidate button
    to assemble a coherent About paragraph. */
@@ -183,7 +180,7 @@ const RANDOM_MOTIVES = [
   "they saw the same broken system fail people every single day at work"
 ];
 const RANDOM_LEAD_STYLES = [
-  "runs a meeting like a job site — short, direct, and finished on time",
+  "runs a meeting like a job site: short, direct, and finished on time",
   "refuses to vote on anything they have not read cover to cover",
   "brings the loudest critic in the room into the conversation first",
   "decides fast and takes the blame publicly when they get it wrong",
@@ -210,9 +207,7 @@ function mk(name, age, party, occupation, state, topIssue, slogan, about) {
     name: name, age: age, party: party, occupation: occupation, state: state,
     topIssue: topIssue, slogan: slogan, about: about,
     logoColor: LOGO_COLOR_PALETTE[name.length % LOGO_COLOR_PALETTE.length],
-    prebuilt: true
-  };
-}
+    prebuilt: true }; }
 
 const PREBUILT_POLITICIANS = [
   mk("Jack Thompson", 68, "Golden Freedom Party", "Business Executive", "New York", "Economy",
@@ -277,7 +272,7 @@ const PREBUILT_POLITICIANS = [
     "Patricia Reyes is a civil rights attorney who spent twenty years suing the government she now wants to run. She ran because she believed immigration policy had become a talking point instead of a plan. She leads by putting the affected people in the room before the lobbyists. Supporters call her fearless; critics say she is an activist, not an administrator."),
   mk("Douglas Kerrigan", 63, "Industrial Heartland Party", "Factory Worker", "Michigan", "Jobs & Workers",
     "Bring the Jobs Home",
-    "Douglas Kerrigan is a former line worker and union organizer with a handshake like a vice grip. He ran because he negotiated too many contracts that ended in layoffs anyway. He leads the way he bargained — bluntly, patiently, and never blinking first. Supporters see one of their own; critics say he is fighting an economy that no longer exists."),
+    "Douglas Kerrigan is a former line worker and union organizer with a handshake like a vice grip. He ran because he negotiated too many contracts that ended in layoffs anyway. He leads the way he bargained: bluntly, patiently, and never blinking first. Supporters see one of their own; critics say he is fighting an economy that no longer exists."),
   mk("Eleanor Vance", 49, "Suburban Alliance Party", "Small Business Owner", "Colorado", "Housing",
     "Common Sense, Common Ground",
     "Eleanor Vance is a practical business owner who got into politics after a zoning fight she did not expect to win. She ran because her employees could not afford to live in the town they worked in. She leads by finding the version of a plan that everyone can live with. Supporters like that she is not a lifer; critics say she avoids taking hard positions."),
@@ -309,6 +304,4 @@ if (typeof window !== "undefined") {
     RANDOM_LEAD_STYLES: RANDOM_LEAD_STYLES,
     RANDOM_VIEWS: RANDOM_VIEWS,
     generateRandomSlogan: generateRandomSlogan,
-    generateRandomName: generateRandomName
-  };
-}
+    generateRandomName: generateRandomName }; }

@@ -1,5 +1,5 @@
 /* =========================================================================
-   simulation-engine.js — the OFFLINE fallback election model.
+   simulation-engine.js: the OFFLINE fallback election model.
 
    This file runs in two places:
      1. In the browser, as window.SimEngine (loaded by simulator.html), so
@@ -15,7 +15,7 @@
    The model is deliberately transparent and non-partisan: it scores a
    candidate on communication clarity, relatability, credibility and
    likeability using only what the student wrote. Party affiliation is
-   never worth points — it only changes which voter blocs are described as
+   never worth points. It only changes which voter blocs are described as
    friendly or skeptical, symmetrically.
    ========================================================================= */
 
@@ -74,7 +74,7 @@
   /* --------------------------- text analysis --------------------------- */
 
   /* Keyword banks. Each hit nudges one of four scores. This is a crude but
-     honest heuristic — and it is applied identically no matter which party
+     honest heuristic, and it is applied identically no matter which party
      the candidate belongs to. */
   var SIGNALS = {
     decisive:   ["blunt","decisive","confident","bold","tough","fearless","direct","unapologetic","firm","fights","fighter","no-nonsense","stubborn"],
@@ -139,7 +139,7 @@
     var words = about.trim() ? about.trim().split(/\s+/).length : 0;
     var sentences = sentenceCount(about);
 
-    /* Effort — did the student actually write a real description? A fuller
+    /* Effort: did the student actually write a real description? A fuller
        bio gives the analyst more to work with, so it scores higher. */
     var effort = clamp(30 + words * 0.55 + sentences * 4, 20, 95);
 
@@ -160,7 +160,7 @@
     var sloganWords = slogan.trim() ? slogan.trim().split(/\s+/).length : 0;
     var sloganScore = sloganWords === 0 ? 25 : clamp(85 - Math.abs(sloganWords - 5) * 7, 30, 92);
 
-    /* Age is not good or bad — but it does shape which age blocs feel
+    /* Age is not good or bad, but it does shape which age blocs feel
        represented, so we keep the raw number rather than scoring it. */
     var age = Number(c.age) || 50;
 
@@ -271,7 +271,7 @@
   var AGE_NOTES_STRONG = {
     "18-29": "Younger voters respond to the energy of the campaign more than its details.",
     "30-44": "Voters raising families read WHO's ISSUE message as being about their own bills.",
-    "45-64": "This is WHO's most reliable bloc — they know the record and they turn out.",
+    "45-64": "This is WHO's most reliable bloc. They know the record and they turn out.",
     "65+": "Older voters trust WHO's steadiness, and they vote at the highest rate of any group."
   };
   var AGE_NOTES_WEAK = {
@@ -292,7 +292,7 @@
     if (kind === "age") {
       if (strong) return fill(AGE_NOTES_STRONG[group] || "This bloc is with WHO.", who, issue);
       if (weak) return fill(AGE_NOTES_WEAK[group] || "This bloc is not sold on WHO.", who, issue);
-      return "Split close to evenly and highly persuadable — the bloc most worth chasing.";
+      return "Split close to evenly and highly persuadable. The bloc most worth chasing.";
     }
     if (kind === "lean") {
       if (strong) return group + " voters find " + who + "'s message an easy fit.";
@@ -396,7 +396,7 @@
        still reshapes the demographic breakdown via PARTY_LEAN_TILT, which
        is the only place it is allowed to matter.
 
-       Top issue is excluded for the same reason — no issue is inherently
+       Top issue is excluded for the same reason. No issue is inherently
        worth more than another. Where the chosen issue legitimately matters
        is whether it FITS the candidate's old job, and that is scored
        explicitly in profileCandidate() rather than left to noise. */
@@ -413,7 +413,7 @@
 
     var undecided = round(clamp(4 + rng() * 7 - gap * 0.04, 3, 14));
     var remaining = 100 - undecided;
-    /* Real races are close. The gap moves the split, but only so far —
+    /* Real races are close. The gap moves the split, but only so far.
        a well-written candidate wins by a few points, not by forty. */
     var share = clamp(0.5 + gap * 0.005 + (rng() * 0.05 - 0.025), 0.38, 0.62);
     var candShare = round(remaining * share);
@@ -444,8 +444,8 @@
     var summary =
       who + " is polling at " + candShare + "% against " + oppName + "'s " + oppShare + "%, with " +
       undecided + "% still undecided. The number is driven mostly by " +
-      (p.credible >= p.warm ? "credibility — voters believe " + who + " can do the job" :
-                              "likeability — voters want " + who + " to succeed") +
+      (p.credible >= p.warm ? "credibility. Voters believe " + who + " can do the job" :
+                              "likeability. Voters want " + who + " to succeed") +
       ", and it is held back by " +
       (p.risk > 40 ? "a style that some voters find abrasive" :
        p.words < 45 ? "how little voters actually know about " + who + " yet" :

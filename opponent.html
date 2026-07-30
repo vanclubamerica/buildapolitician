@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Choose Opponent — Build-A-Politician</title>
-<meta name="description" content="Optional: build a rival candidate or pick from 25 fictional politicians for your candidate to run against.">
+<title>Opponents | Build-A-Politician</title>
+<meta name="description" content="Pick who your candidate runs against, or let one be chosen for you.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Scouting the opposition…</span></div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Loading</span></div>
 
 <header class="site-header">
   <div class="container nav-row">
@@ -18,110 +18,106 @@
     <nav aria-label="Primary">
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="create.html">Create Politician</a></li>
-        <li><a href="opponent.html" aria-current="page">Choose Opponent</a></li>
-        <li><a href="simulator.html">Election Simulator</a></li>
-        <li><a href="results.html">Results</a></li>
+        <li><a href="create.html">Create Candidate</a></li>
+        <li><a href="simulator.html">Simulator</a></li>
         <li><a href="how-it-works.html">How It Works</a></li>
-        <li><a href="about.html">About</a></li>
       </ul>
     </nav>
     <div class="nav-tools">
-      <button class="icon-toggle" data-sound-toggle title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
-      <button class="icon-toggle" data-music-toggle title="Toggle background music" aria-label="Toggle background music">🎵</button>
-      <button class="theme-pill" data-theme-toggle aria-pressed="false"><span aria-hidden="true">🌓</span><span class="theme-label">Dark Mode</span></button>
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <button class="theme-pill" data-theme-toggle aria-pressed="false">Dark</button>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="section" style="padding-top:2.5rem;">
-    <div class="container">
-      <p class="eyebrow">Optional Step</p>
-      <h1>Choose Your Opponent</h1>
-      <p class="hero-sub">Skip this and the AI analyst will invent a credible rival on its own. Or pick one of 25 fictional politicians, or build your own — the head-to-head poll gets sharper when the simulator knows who is on the other side.</p>
+  <div class="container section-tight">
+    <h1>Pick an opponent</h1>
+    <p class="lead mb-2">Optional. Skip this and one will be chosen for you.</p>
 
-      <div class="card card-pad mt-2 mb-2" id="currentOpponent" style="display:none;">
-        <div class="flex-between">
-          <div>
-            <p class="eyebrow" style="margin:0;">Currently running against</p>
-            <strong id="currentOpponentName" style="font-size:1.2rem;"></strong>
-          </div>
-          <button type="button" class="btn secondary small" id="clearOpponentBtn">✕ Clear — let the AI choose</button>
+    <div class="card card-pad mb-2" id="currentOpponent" style="display:none;">
+      <div class="flex-between">
+        <div>
+          <p class="eyebrow" style="margin:0;">Running against</p>
+          <strong id="currentOpponentName"></strong>
         </div>
-      </div>
-
-      <div class="tab-row">
-        <button class="tab-btn active" data-target="tab-roster">Pick a Fictional Politician</button>
-        <button class="tab-btn" data-target="tab-custom">Build a Custom Opponent</button>
-      </div>
-
-      <!-- Roster -->
-      <div class="tab-panel active" id="tab-roster">
-        <div class="search-bar">
-          <input type="text" id="rosterSearch" placeholder="Search by name, party, job, or issue…" aria-label="Search fictional politicians">
-        </div>
-        <p id="rosterMessage" role="status" style="font-weight:600;"></p>
-        <div class="grid grid-3" id="rosterGrid" role="list"></div>
-      </div>
-
-      <!-- Custom -->
-      <div class="tab-panel" id="tab-custom">
-        <div class="creator-layout">
-          <form id="opponentForm">
-            <section class="card creator-step">
-              <div class="step-head"><span class="step-badge">1</span><h2>Basics</h2></div>
-              <div class="form-grid">
-                <div class="field"><label for="oppNameInput">Candidate Name</label><input type="text" id="oppNameInput" placeholder="Morgan Prescott" autocomplete="off"></div>
-                <div class="field"><label for="oppPartyInput">Party</label><input type="text" id="oppPartyInput" placeholder="Heritage Party" autocomplete="off"></div>
-                <div class="field"><label for="oppAgeInput">Age</label><input type="number" id="oppAgeInput" min="25" max="90" value="52"></div>
-                <div class="field"><label for="oppStateSelect">Home State</label><select id="oppStateSelect"></select></div>
-                <div class="field"><label for="oppOccupationInput">Occupation Before Politics</label><input type="text" id="oppOccupationInput" placeholder="Governor" autocomplete="off"></div>
-                <div class="field"><label for="oppIssueSelect">Top Issue</label><select id="oppIssueSelect"></select></div>
-                <div class="field full">
-                  <label for="oppSloganInput">Campaign Slogan</label>
-                  <div style="display:flex; gap:0.6rem;">
-                    <input type="text" id="oppSloganInput" placeholder="A New Chapter Starts Now" style="flex:1;" autocomplete="off">
-                    <button type="button" class="btn secondary small" id="oppRandomSloganBtn">🎲</button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section class="card creator-step">
-              <div class="step-head"><span class="step-badge">2</span><h2>About This Opponent</h2></div>
-              <p class="step-hint">Three to five sentences, same as your own candidate. A vague opponent makes for a vague matchup.</p>
-              <textarea id="oppAboutInput" placeholder="Morgan Prescott is a careful, well-prepared career official who has never lost an election. They ran because they believe steady hands beat loud voices. Supporters call them dependable; critics call them dull." aria-label="About the opponent"></textarea>
-            </section>
-
-            <div class="card card-pad">
-              <div class="button-bar">
-                <button type="button" class="btn" id="oppSaveBtn">💾 Save as Opponent</button>
-                <button type="button" class="btn secondary" id="oppRandomizeBtn">🎲 Random Opponent</button>
-              </div>
-              <p id="oppFormMessage" role="status" class="mt-2" style="font-weight:600;"></p>
-            </div>
-          </form>
-
-          <aside class="creator-rail">
-            <p class="eyebrow text-center">Live Preview</p>
-            <div class="candidate-card" id="oppPreviewCard"></div>
-          </aside>
-        </div>
-      </div>
-
-      <div class="text-center mt-2">
-        <a class="btn gold" href="simulator.html">Next: Run the Simulation →</a>
+        <button type="button" class="btn secondary small" id="clearOpponentBtn">Clear</button>
       </div>
     </div>
-  </section>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-target="tab-roster">Choose from a list</button>
+      <button class="tab-btn" data-target="tab-custom">Build your own</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-roster">
+      <div class="search-bar">
+        <input type="text" id="rosterSearch" placeholder="Search by name, party, job or issue" aria-label="Search opponents">
+      </div>
+      <p id="rosterMessage" class="small muted" role="status"></p>
+      <div class="grid grid-3 mt-1" id="rosterGrid" role="list"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-custom">
+      <div class="creator-layout">
+        <form id="opponentForm">
+          <section class="card step-card">
+            <div class="step-label"><span class="num">1</span><h2>Basics</h2></div>
+            <div class="form-grid">
+              <div class="field"><label for="oppNameInput">Name</label><input type="text" id="oppNameInput" placeholder="Morgan Prescott" autocomplete="off"></div>
+              <div class="field"><label for="oppPartyInput">Party</label><input type="text" id="oppPartyInput" placeholder="Heritage Party" autocomplete="off"></div>
+              <div class="field"><label for="oppAgeInput">Age</label><input type="number" id="oppAgeInput" min="25" max="90" value="52"></div>
+              <div class="field"><label for="oppStateSelect">Home state</label><select id="oppStateSelect"></select></div>
+              <div class="field"><label for="oppOccupationInput">Occupation before politics</label><input type="text" id="oppOccupationInput" placeholder="Governor" autocomplete="off"></div>
+              <div class="field"><label for="oppIssueSelect">Top issue</label><select id="oppIssueSelect"></select></div>
+              <div class="field full">
+                <label for="oppSloganInput">Slogan</label>
+                <div class="input-row">
+                  <input type="text" id="oppSloganInput" placeholder="A New Chapter Starts Now" autocomplete="off">
+                  <button type="button" class="btn secondary" id="oppRandomSloganBtn">Random</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card step-card">
+            <div class="step-label"><span class="num">2</span><h2>About them</h2><span class="hint">3 to 5 sentences</span></div>
+            <textarea id="oppAboutInput" aria-label="About the opponent"
+              placeholder="Morgan Prescott is a careful, well-prepared official who has never lost an election. They ran because they believe steady hands beat loud voices. Supporters call them dependable; critics call them dull."></textarea>
+          </section>
+
+          <div class="card card-pad">
+            <div class="button-row">
+              <button type="button" class="btn" id="oppSaveBtn">Save opponent</button>
+              <button type="button" class="btn secondary" id="oppRandomizeBtn">Random</button>
+            </div>
+            <p id="oppFormMessage" class="form-msg" role="status"></p>
+          </div>
+        </form>
+
+        <aside class="rail">
+          <div class="candidate-card" id="oppPreviewCard"></div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="text-center mt-3">
+      <a class="btn large" href="simulator.html">Run the simulation</a>
+    </div>
+  </div>
 </main>
 
 <footer class="site-footer">
   <div class="container footer-row">
-    <div class="footer-brand">Build-A-Politician</div>
-    <div class="footer-credit">Created by Van Club America • Van, Texas<br>© <span data-year></span> Build-A-Politician.</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="create.html">Create</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="button-row">
+      <button class="btn ghost small" data-sound-toggle aria-pressed="true">Sound: on</button>
+    </div>
   </div>
 </footer>
 

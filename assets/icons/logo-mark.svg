@@ -1,8 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Build-A-Politician mark">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#d4af37"/><stop offset="1" stop-color="#c8102e"/>
-  </linearGradient></defs>
-  <circle cx="32" cy="32" r="30" fill="#0a1730" stroke="url(#g)" stroke-width="3"/>
-  <path d="M32 13 L36.6 24.4 L48.8 25.2 L39.4 33 L42.4 44.8 L32 38.2 L21.6 44.8 L24.6 33 L15.2 25.2 L27.4 24.4 Z" fill="#d4af37"/>
-  <rect x="18" y="48" width="28" height="3.4" rx="1.7" fill="#c8102e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Build-A-Politician">
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#233c56"/>
+  <path d="M32 17 L36 27.4 L47 28.2 L38.6 35.2 L41.3 46 L32 40 L22.7 46 L25.4 35.2 L17 28.2 L28 27.4 Z" fill="#ffffff"/>
+  <rect x="20" y="49" width="24" height="3" rx="1.5" fill="#b22234"/>
 </svg>

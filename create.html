@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Create Politician — Build-A-Politician</title>
-<meta name="description" content="Design your fictional candidate: name, age, party, background, home state, top issue, slogan, and their story.">
+<title>Create Candidate | Build-A-Politician</title>
+<meta name="description" content="Build your candidate: name, age, party, background, home state, issue and slogan.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Filing candidacy papers…</span></div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Loading</span></div>
 <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -19,163 +19,148 @@
     <nav aria-label="Primary">
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
-        <li><a href="create.html" aria-current="page">Create Politician</a></li>
-        <li><a href="opponent.html">Choose Opponent</a></li>
-        <li><a href="simulator.html">Election Simulator</a></li>
-        <li><a href="results.html">Results</a></li>
+        <li><a href="create.html" aria-current="page">Create Candidate</a></li>
+        <li><a href="simulator.html">Simulator</a></li>
         <li><a href="how-it-works.html">How It Works</a></li>
-        <li><a href="about.html">About</a></li>
       </ul>
     </nav>
     <div class="nav-tools">
-      <button class="icon-toggle" data-sound-toggle title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
-      <button class="icon-toggle" data-music-toggle title="Toggle background music" aria-label="Toggle background music">🎵</button>
-      <button class="theme-pill" data-theme-toggle aria-pressed="false"><span aria-hidden="true">🌓</span><span class="theme-label">Dark Mode</span></button>
-      <button class="nav-burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <button class="theme-pill" data-theme-toggle aria-pressed="false">Dark</button>
+      <button class="nav-burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
     </div>
   </div>
 </header>
 
 <main id="main">
-  <section class="section" style="padding-top:2.5rem;">
-    <div class="container">
-      <p class="eyebrow">Step 1 of 3 — Character Creator</p>
-      <h1>Create Your Politician</h1>
-      <p class="hero-sub">Eight choices build your candidate. The card on the right updates as you go, and the AI analyst reads every word of it.</p>
-
-      <div class="button-bar mt-2 mb-2">
-        <button type="button" class="btn secondary" id="exampleBtn">👀 Load the Example</button>
-        <button type="button" class="btn secondary" id="randomCandidateBtn">🎲 Surprise Me</button>
+  <div class="container section-tight">
+    <div class="flex-between mb-2">
+      <div>
+        <h1>Create your candidate</h1>
+        <p class="lead">Fill in the eight fields. The card updates as you go.</p>
       </div>
-
-      <div class="creator-layout">
-        <form id="builderForm" novalidate>
-
-          <!-- 1. Name -->
-          <section class="card creator-step" id="step-name" data-step="name">
-            <div class="step-head"><span class="step-badge">1</span><h2>Name</h2></div>
-            <p class="step-hint">What is your candidate called? Use a made-up name — this is a fictional person.</p>
-            <div style="display:flex; gap:0.6rem;">
-              <input type="text" id="nameInput" placeholder="John Carter" style="flex:1;" autocomplete="off" aria-label="Candidate name">
-              <button type="button" class="btn secondary small" id="randomNameBtn" title="Random name">🎲</button>
-            </div>
-          </section>
-
-          <!-- 2. Age -->
-          <section class="card creator-step" id="step-age" data-step="age">
-            <div class="step-head"><span class="step-badge">2</span><h2>Age</h2></div>
-            <p class="step-hint">Age shapes which voters see themselves in your candidate. Neither young nor old is better.</p>
-            <div class="age-readout">
-              <span class="age-num" id="ageNum">45</span>
-              <span class="age-tag" id="ageTag"></span>
-            </div>
-            <input type="range" id="ageInput" min="25" max="90" value="45" step="1" style="width:100%;" aria-label="Candidate age">
-            <div class="age-ticks"><span>25</span><span>40</span><span>55</span><span>70</span><span>90</span></div>
-          </section>
-
-          <!-- 3. Party -->
-          <section class="card creator-step" id="step-party" data-step="party">
-            <div class="step-head"><span class="step-badge">3</span><h2>Party</h2></div>
-            <p class="step-hint">Pick a ticket or invent your own. The simulator gives no party a built-in advantage.</p>
-            <div class="tile-grid" id="partyTiles" role="radiogroup" aria-label="Political party"></div>
-            <div class="field mt-2" id="customPartyWrap" style="display:none;">
-              <label for="customPartyInput">Your party's name</label>
-              <input type="text" id="customPartyInput" placeholder="Common Sense Coalition" autocomplete="off">
-            </div>
-          </section>
-
-          <!-- 4. Occupation -->
-          <section class="card creator-step" id="step-occupation" data-step="occupation">
-            <div class="step-head"><span class="step-badge">4</span><h2>Occupation Before Politics</h2></div>
-            <p class="step-hint">What did they do for a living first? This is where a candidate's credibility comes from.</p>
-            <div class="tile-grid compact scroll" id="occupationTiles" role="radiogroup" aria-label="Occupation before politics"></div>
-            <div class="field mt-2" id="customOccupationWrap" style="display:none;">
-              <label for="customOccupationInput">Their job</label>
-              <input type="text" id="customOccupationInput" placeholder="Air traffic controller" autocomplete="off">
-            </div>
-          </section>
-
-          <!-- 5. Home State -->
-          <section class="card creator-step" id="step-state" data-step="state">
-            <div class="step-head"><span class="step-badge">5</span><h2>Home State</h2></div>
-            <p class="step-hint">Where are they from? Their home state gives the campaign a real place to talk about.</p>
-            <select id="stateSelect" aria-label="Home state" style="width:100%; max-width:340px;"></select>
-          </section>
-
-          <!-- 6. Top Issue -->
-          <section class="card creator-step" id="step-topIssue" data-step="topIssue">
-            <div class="step-head"><span class="step-badge">6</span><h2>Top Issue</h2></div>
-            <p class="step-hint">The one thing they are known for. Choosing an issue that matches their old job is a strong move.</p>
-            <div class="tile-grid" id="issueTiles" role="radiogroup" aria-label="Top issue"></div>
-          </section>
-
-          <!-- 7. Slogan -->
-          <section class="card creator-step" id="step-slogan" data-step="slogan">
-            <div class="step-head"><span class="step-badge">7</span><h2>Campaign Slogan</h2></div>
-            <p class="step-hint">Short beats clever. Four to six words a voter could repeat from memory.</p>
-            <div style="display:flex; gap:0.6rem;">
-              <input type="text" id="sloganInput" placeholder="Common Sense. Real Results." style="flex:1;" autocomplete="off" aria-label="Campaign slogan">
-              <button type="button" class="btn secondary small" id="randomSloganBtn" title="Random slogan">🎲</button>
-            </div>
-          </section>
-
-          <!-- 8. About -->
-          <section class="card creator-step" id="step-about" data-step="about">
-            <div class="step-head"><span class="step-badge">8</span><h2>About Your Candidate</h2></div>
-            <p class="step-hint">Write 3–5 sentences. This is the most important box on the page — the AI analyst bases most of its report on what you write here. Click a question below to drop in a sentence starter.</p>
-            <div class="prompt-chips" id="aboutPrompts"></div>
-            <textarea id="aboutInput" placeholder="John Carter is a blunt, confident leader who believes politicians spend too much time arguing instead of solving problems. He built a successful business before entering politics and wants to bring a different approach to government. Supporters see him as honest and decisive, while critics see him as stubborn." aria-label="About your candidate"></textarea>
-            <div class="sentence-meter">
-              <div class="sentence-dots" id="sentenceDots" aria-hidden="true"></div>
-              <span class="sentence-status" id="sentenceStatus">0 sentences — aim for 3 to 5</span>
-            </div>
-          </section>
-
-          <!-- Campaign color -->
-          <section class="card creator-step" id="step-color">
-            <div class="step-head"><span class="step-badge">★</span><h2>Campaign Color</h2></div>
-            <p class="step-hint">Optional. Sets the banner on your candidate card.</p>
-            <div class="color-swatches" id="colorSwatches"></div>
-          </section>
-
-          <div class="card card-pad">
-            <div class="button-bar">
-              <button type="button" class="btn" id="saveBtn">💾 Save Candidate</button>
-              <button type="button" class="btn navy" id="downloadBtn">⬇ Download JSON</button>
-              <label class="btn secondary" for="loadInput" style="cursor:pointer;">⬆ Load JSON
-                <input type="file" id="loadInput" accept="application/json" class="visually-hidden">
-              </label>
-              <button type="button" class="btn secondary" id="printBtn">🖨 Print Card</button>
-              <button type="button" class="btn secondary" id="resetBtn">↺ Reset</button>
-            </div>
-            <p id="formMessage" role="status" class="mt-2" style="font-weight:600;"></p>
-          </div>
-        </form>
-
-        <aside class="creator-rail">
-          <div class="card completion-card">
-            <div class="completion-top">
-              <strong>Candidate File</strong>
-              <span class="completion-pct" id="completionPct">0%</span>
-            </div>
-            <div class="meter"><span id="completionMeter"></span></div>
-            <ul class="checklist" id="checklist"></ul>
-          </div>
-
-          <div class="candidate-card" id="previewCard"></div>
-
-          <a class="btn gold block" href="simulator.html" id="toSimBtn">⚡ Run Election Simulation →</a>
-          <a class="btn secondary block" href="opponent.html">Optional: Choose an Opponent</a>
-        </aside>
+      <div class="button-row">
+        <button type="button" class="btn secondary small" id="exampleBtn">See an example</button>
+        <button type="button" class="btn secondary small" id="randomCandidateBtn">Random</button>
       </div>
     </div>
-  </section>
+
+    <div class="creator-layout">
+      <form id="builderForm" novalidate>
+
+        <section class="card step-card" id="step-name">
+          <div class="step-label"><span class="num">1</span><h2>Name</h2></div>
+          <div class="input-row">
+            <input type="text" id="nameInput" placeholder="John Carter" autocomplete="off" aria-label="Candidate name">
+            <button type="button" class="btn secondary" id="randomNameBtn">Random</button>
+          </div>
+        </section>
+
+        <section class="card step-card" id="step-age">
+          <div class="step-label"><span class="num">2</span><h2>Age</h2></div>
+          <div class="age-value" id="ageNum">45</div>
+          <p class="age-note" id="ageTag"></p>
+          <input type="range" id="ageInput" min="25" max="90" value="45" step="1" aria-label="Candidate age">
+          <div class="range-ends"><span>25</span><span>90</span></div>
+        </section>
+
+        <section class="card step-card" id="step-party">
+          <div class="step-label"><span class="num">3</span><h2>Party</h2></div>
+          <div class="tiles" id="partyTiles" role="radiogroup" aria-label="Party"></div>
+          <div class="field mt-2" id="customPartyWrap" style="display:none;">
+            <label for="customPartyInput">Party name</label>
+            <input type="text" id="customPartyInput" placeholder="Common Sense Coalition" autocomplete="off">
+          </div>
+        </section>
+
+        <section class="card step-card" id="step-occupation">
+          <div class="step-label"><span class="num">4</span><h2>Occupation before politics</h2></div>
+          <div class="tiles dense scroll" id="occupationTiles" role="radiogroup" aria-label="Occupation before politics"></div>
+          <div class="field mt-2" id="customOccupationWrap" style="display:none;">
+            <label for="customOccupationInput">Their job</label>
+            <input type="text" id="customOccupationInput" placeholder="Air traffic controller" autocomplete="off">
+          </div>
+        </section>
+
+        <section class="card step-card" id="step-state">
+          <div class="step-label"><span class="num">5</span><h2>Home state</h2></div>
+          <select id="stateSelect" aria-label="Home state" style="max-width:320px;"></select>
+        </section>
+
+        <section class="card step-card" id="step-topIssue">
+          <div class="step-label"><span class="num">6</span><h2>Top issue</h2><span class="hint">Pick one</span></div>
+          <div class="tiles" id="issueTiles" role="radiogroup" aria-label="Top issue"></div>
+        </section>
+
+        <section class="card step-card" id="step-slogan">
+          <div class="step-label"><span class="num">7</span><h2>Campaign slogan</h2><span class="hint">4 to 6 words</span></div>
+          <div class="input-row">
+            <input type="text" id="sloganInput" placeholder="Common Sense. Real Results." autocomplete="off" aria-label="Campaign slogan">
+            <button type="button" class="btn secondary" id="randomSloganBtn">Random</button>
+          </div>
+        </section>
+
+        <section class="card step-card" id="step-about">
+          <div class="step-label"><span class="num">8</span><h2>About your candidate</h2><span class="hint">3 to 5 sentences</span></div>
+          <p class="small muted mb-1">Answer these in your own words. Click one to start a sentence.</p>
+          <div class="prompt-list" id="aboutPrompts"></div>
+          <textarea id="aboutInput" aria-label="About your candidate"
+            placeholder="John Carter is a blunt, confident leader who believes politicians spend too much time arguing instead of solving problems. He built a successful business before entering politics. Supporters see him as honest and decisive, while critics see him as stubborn."></textarea>
+          <div class="meter-row">
+            <div class="dots" id="sentenceDots" aria-hidden="true"></div>
+            <span class="meter-note" id="sentenceStatus">Aim for 3 to 5 sentences</span>
+          </div>
+        </section>
+
+        <section class="card step-card" id="step-color">
+          <div class="step-label"><span class="num">9</span><h2>Campaign color</h2><span class="hint">Optional</span></div>
+          <div class="swatches" id="colorSwatches"></div>
+        </section>
+
+        <div class="card card-pad">
+          <div class="button-row">
+            <button type="button" class="btn" id="saveBtn">Save</button>
+            <button type="button" class="btn secondary" id="downloadBtn">Download</button>
+            <label class="btn secondary" for="loadInput" style="cursor:pointer;">Load file
+              <input type="file" id="loadInput" accept="application/json" class="visually-hidden">
+            </label>
+            <button type="button" class="btn secondary" id="printBtn">Print</button>
+            <button type="button" class="btn ghost" id="resetBtn">Reset</button>
+          </div>
+          <p id="formMessage" class="form-msg" role="status"></p>
+        </div>
+      </form>
+
+      <aside class="rail">
+        <div class="card progress-card">
+          <div class="progress-top">
+            <span>Progress</span>
+            <span class="progress-pct" id="completionPct">0%</span>
+          </div>
+          <div class="bar"><span id="completionMeter"></span></div>
+          <ul class="checklist" id="checklist"></ul>
+        </div>
+
+        <div class="candidate-card" id="previewCard"></div>
+
+        <a class="btn block" href="simulator.html" id="toSimBtn">Run the simulation</a>
+        <a class="btn secondary block" href="opponent.html">Pick an opponent</a>
+      </aside>
+    </div>
+  </div>
 </main>
 
 <footer class="site-footer">
   <div class="container footer-row">
-    <div class="footer-brand">Build-A-Politician</div>
-    <div class="footer-credit">Created by Van Club America • Van, Texas<br>© <span data-year></span> Build-A-Politician.</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="opponent.html">Opponents</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="button-row">
+      <button class="btn ghost small" data-sound-toggle aria-pressed="true">Sound: on</button>
+      <button class="btn ghost small" data-music-toggle aria-pressed="false">Music: off</button>
+    </div>
   </div>
 </footer>
 

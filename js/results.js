@@ -1,5 +1,5 @@
 /* =========================================================================
-   results.js — reads the last simulation saved by simulator.js and renders
+   results.js: reads the last simulation saved by simulator.js and renders
    the full breakdown. The heavy lifting is in report.js; this file only
    handles the banner, the candidate card, and the page-level actions.
    ========================================================================= */
@@ -23,12 +23,11 @@ function initResultsPage() {
   const won = margin > 0;
   const tied = margin === 0;
 
-  document.getElementById("resultEyebrow").textContent = result.projection;
   document.getElementById("winnerBannerText").textContent = tied
-    ? "Too Close to Call"
-    : (won ? `${result.candidate_name} Wins` : `${result.opponent_name} Wins`);
+    ? "Too close to call"
+    : (won ? `${result.candidate_name} wins` : `${result.opponent_name} wins`);
   document.getElementById("winnerBannerSub").textContent =
-    `${result.candidate_name} ${poll.candidate}% · ${result.opponent_name} ${poll.opponent}% · Undecided ${poll.undecided}%`;
+    `${result.candidate_name} ${poll.candidate}%, ${result.opponent_name} ${poll.opponent}%, undecided ${poll.undecided}%`;
 
   const candidate = result.candidateSnapshot || Storage.load(Storage.KEY_PLAYER);
   if (candidate) {
@@ -39,8 +38,7 @@ function initResultsPage() {
   if (result.ranAt) {
     const when = new Date(result.ranAt);
     document.getElementById("ranAtNote").textContent =
-      "Simulation run " + when.toLocaleString() +
-      (result.source === "ai" ? " by the AI analyst." : " by the offline model.");
+      "Run " + when.toLocaleDateString() + " at " + when.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   }
 
   Report.render(document.getElementById("reportRoot"), result);
