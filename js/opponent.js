@@ -1,215 +1,214 @@
 /* =========================================================================
-   opponent.js — Choose Opponent page.
-   Two tabs: build a second custom candidate, or pick from the 25 prebuilt
-   fictional politicians. Selection is stored under Storage.KEY_OPPONENT.
+   opponent.js — Choose Opponent page (optional step).
+
+   Two ways to set an opponent: pick one of the 25 fictional pre-built
+   politicians, or build a custom one. Both produce the same candidate
+   schema the builder produces, so the simulator treats them identically.
+   Leaving this page untouched is fine — the analyst invents a rival.
    ========================================================================= */
 
-const OPP_TRAITS = [
-  { id: "charisma", label: "Charisma" }, { id: "integrity", label: "Integrity" },
-  { id: "publicSpeaking", label: "Public Speaking" }, { id: "debateSkill", label: "Debate Skill" },
-  { id: "fundraising", label: "Fundraising Ability" }, { id: "popularity", label: "Popularity" },
-  { id: "experience", label: "Experience" }, { id: "intelligence", label: "Intelligence" }
-];
+let opponent = CandidateUI.blank();
 
-function defaultOpponent() {
-  return {
-    name: "", party: "", slogan: "", age: 50, state: "Ohio",
-    experience: "", occupation: "", leadership: GameData.LEADERSHIP_STYLES[1],
-    speech: GameData.SPEECH_STYLES[1], economicFocus: "", foreignPolicyFocus: "",
-    educationPosition: "", healthcarePosition: "", immigrationPosition: "",
-    environmentPosition: "", crimePosition: "", taxPosition: "", militaryPosition: "", governmentSize: "",
-    traits: { charisma: 55, integrity: 55, publicSpeaking: 55, debateSkill: 55, fundraising: 55, popularity: 55, experience: 55, intelligence: 55 },
-    logoColor: GameData.LOGO_COLOR_PALETTE[1]
-  };
-}
-let customOpponent = defaultOpponent();
+function oppEl(id) { return document.getElementById(id); }
+
+/* ------------------------------- tabs -------------------------------- */
 
 function initTabs() {
-  const tabs = document.querySelectorAll(".tab-btn");
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      tabs.forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-      tab.classList.add("active");
-      document.getElementById(tab.dataset.target).classList.add("active");
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.target).classList.add("active");
       playBlip(480, 0.06);
     });
   });
 }
 
-/* ---------------- Custom opponent builder (mirrors create.html) ---------------- */
-function buildSelect(select, list, selected) {
-  select.innerHTML = "";
-  list.forEach(item => {
-    const opt = document.createElement("option");
-    opt.value = item; opt.textContent = item;
-    if (item === selected) opt.selected = true;
-    select.appendChild(opt);
+/* ---------------------------- current pick ---------------------------- */
+
+function refreshCurrentOpponent() {
+  const saved = Storage.load(Storage.KEY_OPPONENT);
+  const bar = oppEl("currentOpponent");
+  if (saved && saved.name) {
+    bar.style.display = "";
+    oppEl("currentOpponentName").textContent = saved.name + " — " + (saved.party || "Independent");
+  } else {
+    bar.style.display = "none";
+  }
+  highlightSelectedRosterCard(saved);
+}
+
+function highlightSelectedRosterCard(saved) {
+  document.querySelectorAll("#rosterGrid .opponent-card").forEach(card => {
+    card.classList.toggle("selected", !!saved && card.dataset.id === saved.id);
   });
 }
 
-function renderOppPolicyGroups() {
-  const wrap = document.getElementById("oppPolicyGroups");
-  wrap.innerHTML = "";
-  GameData.POLICY_QUESTIONS.forEach(q => {
-    if (!customOpponent[q.id]) customOpponent[q.id] = q.options[0].value;
-    const fs = document.createElement("fieldset");
-    fs.innerHTML = `<legend>${q.label}</legend>`;
-    const group = document.createElement("div");
-    group.className = "choice-group";
-    q.options.forEach(opt => {
-      const chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "choice-chip" + (customOpponent[q.id] === opt.value ? " selected" : "");
-      chip.textContent = opt.value;
-      chip.addEventListener("click", () => {
-        customOpponent[q.id] = opt.value;
-        group.querySelectorAll(".choice-chip").forEach(c => c.classList.remove("selected"));
-        chip.classList.add("selected");
-        updateOppPreview();
-      });
-      group.appendChild(chip);
+/* ------------------------------ roster ------------------------------- */
+
+function renderRoster(filter) {
+  const grid = oppEl("rosterGrid");
+  const term = String(filter || "").toLowerCase().trim();
+  const list = GameData.PREBUILT_POLITICIANS.filter(p =>
+    !term ||
+    p.name.toLowerCase().includes(term) ||
+    p.party.toLowerCase().includes(term) ||
+    p.occupation.toLowerCase().includes(term) ||
+    p.topIssue.toLowerCase().includes(term)
+  );
+
+  oppEl("rosterMessage").textContent = term
+    ? `${list.length} of ${GameData.PREBUILT_POLITICIANS.length} politicians match "${filter}".`
+    : "";
+
+  grid.innerHTML = "";
+  list.forEach(p => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "card opponent-card card-hover";
+    card.dataset.id = p.id;
+    card.setAttribute("role", "listitem");
+    card.innerHTML = `
+      <h4>${CandidateUI.escape(p.name)}</h4>
+      <span class="candidate-party">${CandidateUI.escape(p.party)}</span>
+      <p style="font-style:italic; margin:0.3rem 0 0.6rem;">"${CandidateUI.escape(p.slogan)}"</p>
+      <div class="candidate-issue-row">
+        <span class="issue-pill">${CandidateUI.issueIcon(p.topIssue)} ${CandidateUI.escape(p.topIssue)}</span>
+      </div>
+      <p style="font-size:0.78rem; margin-top:0.6rem;">
+        Age ${CandidateUI.escape(p.age)} · ${CandidateUI.escape(p.state)} · was a ${CandidateUI.escape(p.occupation)}
+      </p>`;
+    card.addEventListener("click", () => {
+      Storage.save(Storage.KEY_OPPONENT, p);
+      refreshCurrentOpponent();
+      playBlip(700, 0.12, "triangle");
+      oppEl("rosterMessage").textContent = `${p.name} is now your opponent.`;
     });
-    fs.appendChild(group);
-    wrap.appendChild(fs);
+    grid.appendChild(card);
   });
+
+  highlightSelectedRosterCard(Storage.load(Storage.KEY_OPPONENT));
 }
 
-function renderOppTraitSliders() {
-  const wrap = document.getElementById("oppTraitSliders");
-  wrap.innerHTML = "";
-  OPP_TRAITS.forEach(t => {
-    const field = document.createElement("div");
-    field.className = "slider-field";
-    field.innerHTML = `<label for="opp-trait-${t.id}">${t.label}</label>
-      <div class="slider-row"><input type="range" min="0" max="100" value="${customOpponent.traits[t.id]}" id="opp-trait-${t.id}">
-      <span class="slider-value">${customOpponent.traits[t.id]}</span></div>`;
-    wrap.appendChild(field);
-    const input = field.querySelector("input");
-    const val = field.querySelector(".slider-value");
-    input.addEventListener("input", () => { customOpponent.traits[t.id] = Number(input.value); val.textContent = input.value; updateOppPreview(); });
-  });
-}
+/* --------------------------- custom builder --------------------------- */
 
-function initials(name) { return name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase() || "?"; }
-
-function updateOppPreview() {
-  const p = document.getElementById("oppPreviewCard");
-  if (!p) return;
-  const traitsHtml = OPP_TRAITS.map(t => {
-    const v = customOpponent.traits[t.id];
-    return `<div class="stat-bar-row"><span>${t.label}</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${v}%"></div></div><span>${v}</span></div>`;
-  }).join("");
-  p.innerHTML = `
-    <div class="candidate-card-banner" style="background:linear-gradient(135deg, ${customOpponent.logoColor}, var(--navy-900));"></div>
-    <div class="candidate-card-body">
-      <div class="candidate-avatar" style="background:${customOpponent.logoColor}22;">${initials(customOpponent.name || "Rival Candidate")}</div>
-      <h3 class="candidate-name">${customOpponent.name || "Rival Candidate"}</h3>
-      <div class="candidate-party">${customOpponent.party || "Opposition Party"}</div>
-      <p class="candidate-slogan">"${customOpponent.slogan || "A slogan for the ages"}"</p>
-      <dl class="candidate-meta"><dt>Age</dt><dd>${customOpponent.age||"—"}</dd><dt>Home State</dt><dd>${customOpponent.state||"—"}</dd>
-      <dt>Occupation</dt><dd>${customOpponent.occupation||"—"}</dd><dt>Leadership</dt><dd>${customOpponent.leadership||"—"}</dd></dl>
-      <div class="stat-bars">${traitsHtml}</div>
-    </div>`;
+function updateOpponentPreview() {
+  oppEl("oppPreviewCard").innerHTML = CandidateUI.cardHtml(opponent, { showAbout: true });
 }
 
 function bindOppField(id, key, isNumber) {
-  const el = document.getElementById(id);
-  el.value = customOpponent[key] ?? "";
-  el.addEventListener("input", () => { customOpponent[key] = isNumber ? Number(el.value) : el.value; updateOppPreview(); });
+  const el = oppEl(id);
+  if (!el) return;
+  el.value = opponent[key] || "";
+  el.addEventListener("input", () => {
+    opponent[key] = isNumber ? Number(el.value) : el.value;
+    updateOpponentPreview();
+  });
 }
 
-function initCustomOpponentForm() {
-  buildSelect(document.getElementById("oppStateSelect"), GameData.US_STATE_LIST, customOpponent.state);
-  buildSelect(document.getElementById("oppLeadershipSelect"), GameData.LEADERSHIP_STYLES, customOpponent.leadership);
-  buildSelect(document.getElementById("oppSpeechSelect"), GameData.SPEECH_STYLES, customOpponent.speech);
+function randomizeOpponent() {
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const name = GameData.generateRandomName();
+  const first = name.split(" ")[0];
+  const occupation = pick(GameData.OCCUPATIONS.filter(o => o.value !== "Custom")).value;
+  const issue = pick(GameData.TOP_ISSUES).value;
+
+  opponent = Object.assign(CandidateUI.blank(), {
+    name: name,
+    age: 35 + Math.floor(Math.random() * 40),
+    party: pick(GameData.PARTIES.filter(p => p.value !== "Custom")).value,
+    occupation: occupation,
+    state: pick(GameData.US_STATE_LIST),
+    topIssue: issue,
+    slogan: GameData.generateRandomSlogan(),
+    about: [
+      `${name} is ${pick(GameData.RANDOM_TEMPERAMENTS)} ${occupation.toLowerCase()} with a long list of people who owe them favors.`,
+      `${first} ran for office because ${pick(GameData.RANDOM_MOTIVES)}.`,
+      `As a leader, ${first} ${pick(GameData.RANDOM_LEAD_STYLES)}.`,
+      `Supporters find ${first} ${pick(GameData.RANDOM_VIEWS)}.`
+    ].join(" "),
+    logoColor: pick(GameData.LOGO_COLOR_PALETTE)
+  });
+
+  syncOpponentInputs();
+  playBlip(660, 0.12, "triangle");
+}
+
+function syncOpponentInputs() {
+  oppEl("oppNameInput").value = opponent.name || "";
+  oppEl("oppPartyInput").value = opponent.party || "";
+  oppEl("oppAgeInput").value = opponent.age || 52;
+  oppEl("oppOccupationInput").value = opponent.occupation || "";
+  oppEl("oppSloganInput").value = opponent.slogan || "";
+  oppEl("oppAboutInput").value = opponent.about || "";
+  CandidateUI.fillSelect(oppEl("oppStateSelect"), GameData.US_STATE_LIST, opponent.state);
+  CandidateUI.fillSelect(oppEl("oppIssueSelect"),
+    GameData.TOP_ISSUES.map(i => i.value), opponent.topIssue);
+  updateOpponentPreview();
+}
+
+/* -------------------------------- init -------------------------------- */
+
+function initOpponentPage() {
+  initTabs();
+
+  const saved = Storage.load(Storage.KEY_OPPONENT);
+  if (saved && !saved.prebuilt) opponent = Object.assign(CandidateUI.blank(), saved);
+
   bindOppField("oppNameInput", "name");
   bindOppField("oppPartyInput", "party");
-  bindOppField("oppSloganInput", "slogan");
   bindOppField("oppAgeInput", "age", true);
   bindOppField("oppOccupationInput", "occupation");
-  bindOppField("oppExperienceInput", "experience");
-  document.getElementById("oppStateSelect").addEventListener("change", e => { customOpponent.state = e.target.value; updateOppPreview(); });
-  document.getElementById("oppLeadershipSelect").addEventListener("change", e => { customOpponent.leadership = e.target.value; updateOppPreview(); });
-  document.getElementById("oppSpeechSelect").addEventListener("change", e => { customOpponent.speech = e.target.value; updateOppPreview(); });
-  renderOppPolicyGroups();
-  renderOppTraitSliders();
-  updateOppPreview();
+  bindOppField("oppSloganInput", "slogan");
+  bindOppField("oppAboutInput", "about");
 
-  document.getElementById("oppRandomSloganBtn").addEventListener("click", () => {
-    customOpponent.slogan = GameData.generateRandomSlogan();
-    document.getElementById("oppSloganInput").value = customOpponent.slogan;
-    updateOppPreview();
+  syncOpponentInputs();
+
+  oppEl("oppStateSelect").addEventListener("change", e => {
+    opponent.state = e.target.value;
+    updateOpponentPreview();
+  });
+  oppEl("oppIssueSelect").addEventListener("change", e => {
+    opponent.topIssue = e.target.value;
+    updateOpponentPreview();
   });
 
-  document.getElementById("oppRandomizeBtn").addEventListener("click", () => {
-    customOpponent.name = GameData.generateRandomName();
-    customOpponent.party = ["Heritage Party","Prosperity Alliance","National Reform Party","Cornerstone Party"][Math.floor(Math.random()*4)];
-    customOpponent.slogan = GameData.generateRandomSlogan();
-    customOpponent.age = 40 + Math.floor(Math.random()*45);
-    customOpponent.state = GameData.US_STATE_LIST[Math.floor(Math.random()*GameData.US_STATE_LIST.length)];
-    customOpponent.occupation = ["Governor","Senator","Business Owner","General","Mayor"][Math.floor(Math.random()*5)];
-    GameData.POLICY_QUESTIONS.forEach(q => { customOpponent[q.id] = q.options[Math.floor(Math.random()*q.options.length)].value; });
-    Object.keys(customOpponent.traits).forEach(k => customOpponent.traits[k] = 30 + Math.floor(Math.random()*71));
-    document.getElementById("oppNameInput").value = customOpponent.name;
-    document.getElementById("oppPartyInput").value = customOpponent.party;
-    document.getElementById("oppSloganInput").value = customOpponent.slogan;
-    document.getElementById("oppAgeInput").value = customOpponent.age;
-    document.getElementById("oppStateSelect").value = customOpponent.state;
-    document.getElementById("oppOccupationInput").value = customOpponent.occupation;
-    renderOppPolicyGroups();
-    renderOppTraitSliders();
-    updateOppPreview();
-    playBlip(660, 0.1, "triangle");
+  oppEl("oppRandomSloganBtn").addEventListener("click", () => {
+    opponent.slogan = GameData.generateRandomSlogan();
+    oppEl("oppSloganInput").value = opponent.slogan;
+    updateOpponentPreview();
+    playBlip(620, 0.08);
   });
 
-  document.getElementById("oppSaveBtn").addEventListener("click", () => {
-    if (!customOpponent.name.trim() || !customOpponent.party.trim()) {
-      document.getElementById("oppFormMessage").textContent = "Give your opponent a name and party first.";
-      document.getElementById("oppFormMessage").style.color = "var(--red-400)";
+  oppEl("oppRandomizeBtn").addEventListener("click", randomizeOpponent);
+
+  oppEl("oppSaveBtn").addEventListener("click", () => {
+    const message = oppEl("oppFormMessage");
+    if (!opponent.name.trim()) {
+      message.textContent = "Give your opponent a name first.";
+      message.style.color = "var(--red-400)";
       return;
     }
-    Storage.save(Storage.KEY_OPPONENT, customOpponent);
-    document.getElementById("oppFormMessage").style.color = "#6be089";
-    document.getElementById("oppFormMessage").textContent = "Opponent saved! Head to the Election Simulator.";
-    playBlip(700, 0.15, "triangle");
+    opponent.id = opponent.name.toLowerCase().replace(/[^a-z]+/g, "-");
+    opponent.prebuilt = false;
+    Storage.save(Storage.KEY_OPPONENT, opponent);
+    refreshCurrentOpponent();
+    message.textContent = `${opponent.name} saved as your opponent.`;
+    message.style.color = "#6be089";
+    playBlip(720, 0.15, "triangle");
   });
-}
 
-/* ---------------- Prebuilt roster ---------------- */
-function renderRoster(filter) {
-  const grid = document.getElementById("rosterGrid");
-  grid.innerHTML = "";
-  const term = (filter || "").toLowerCase();
-  const selectedId = (Storage.load(Storage.KEY_OPPONENT) || {}).id;
-  GameData.PREBUILT_POLITICIANS
-    .filter(p => !term || p.name.toLowerCase().includes(term) || p.party.toLowerCase().includes(term))
-    .forEach(p => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "card opponent-card card-hover" + (p.id === selectedId ? " selected" : "");
-      card.innerHTML = `<h4>${p.name}</h4><span class="candidate-party">${p.party}</span>
-        <p class="candidate-slogan">"${p.slogan}"</p>
-        <p style="font-size:0.8rem;">${p.occupation} • ${p.state}</p>`;
-      card.addEventListener("click", () => {
-        Storage.save(Storage.KEY_OPPONENT, p);
-        document.querySelectorAll(".opponent-card").forEach(c => c.classList.remove("selected"));
-        card.classList.add("selected");
-        document.getElementById("rosterMessage").textContent = `${p.name} selected as your opponent.`;
-        document.getElementById("rosterMessage").style.color = "#6be089";
-        playBlip(700, 0.15, "triangle");
-      });
-      grid.appendChild(card);
-    });
-}
+  oppEl("clearOpponentBtn").addEventListener("click", () => {
+    Storage.remove(Storage.KEY_OPPONENT);
+    refreshCurrentOpponent();
+    oppEl("rosterMessage").textContent = "Opponent cleared. The AI analyst will invent one.";
+  });
 
-function initRoster() {
+  oppEl("rosterSearch").addEventListener("input", e => renderRoster(e.target.value));
+
   renderRoster("");
-  document.getElementById("rosterSearch").addEventListener("input", e => renderRoster(e.target.value));
+  refreshCurrentOpponent();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initTabs();
-  initCustomOpponentForm();
-  initRoster();
-});
+document.addEventListener("DOMContentLoaded", initOpponentPage);

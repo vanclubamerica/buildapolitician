@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Choose Opponent — Build-A-Politician</title>
-<meta name="description" content="Build a rival candidate or select from 25 fictional politicians to run against.">
+<meta name="description" content="Optional: build a rival candidate or pick from 25 fictional politicians for your candidate to run against.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -38,73 +38,81 @@
 <main id="main">
   <section class="section" style="padding-top:2.5rem;">
     <div class="container">
-      <p class="eyebrow">Step 2 of 4</p>
+      <p class="eyebrow">Optional Step</p>
       <h1>Choose Your Opponent</h1>
-      <p class="hero-sub">Build a second custom candidate, or select one of 25 fictional politicians inspired by American political history.</p>
+      <p class="hero-sub">Skip this and the AI analyst will invent a credible rival on its own. Or pick one of 25 fictional politicians, or build your own — the head-to-head poll gets sharper when the simulator knows who is on the other side.</p>
 
-      <div class="tab-row mt-2">
-        <button class="tab-btn active" data-target="tab-custom">Build a Custom Opponent</button>
-        <button class="tab-btn" data-target="tab-roster">Choose a Fictional Politician</button>
-      </div>
-
-      <div class="tab-panel active" id="tab-custom">
-        <div class="two-col">
-          <form id="opponentForm">
-            <div class="card card-pad mb-2">
-              <h2 style="font-size:1.3rem;">Biography</h2>
-              <div class="form-grid">
-                <div class="field"><label for="oppNameInput">Candidate Name</label><input type="text" id="oppNameInput" placeholder="Morgan Prescott"></div>
-                <div class="field"><label for="oppPartyInput">Political Party Name</label><input type="text" id="oppPartyInput" placeholder="Heritage Party"></div>
-                <div class="field full">
-                  <label for="oppSloganInput">Campaign Slogan</label>
-                  <div style="display:flex; gap:0.6rem;">
-                    <input type="text" id="oppSloganInput" placeholder="A New Chapter Starts Now" style="flex:1;">
-                    <button type="button" class="btn secondary small" id="oppRandomSloganBtn">🎲 Random</button>
-                  </div>
-                </div>
-                <div class="field"><label for="oppAgeInput">Age</label><input type="number" id="oppAgeInput" min="35" max="100" value="50"></div>
-                <div class="field"><label for="oppStateSelect">Home State</label><select id="oppStateSelect"></select></div>
-                <div class="field full"><label for="oppExperienceInput">Political Experience</label><input type="text" id="oppExperienceInput" placeholder="Three terms as governor"></div>
-                <div class="field"><label for="oppOccupationInput">Occupation</label><input type="text" id="oppOccupationInput" placeholder="Governor"></div>
-                <div class="field"><label for="oppLeadershipSelect">Leadership Style</label><select id="oppLeadershipSelect"></select></div>
-                <div class="field"><label for="oppSpeechSelect">Speech Style</label><select id="oppSpeechSelect"></select></div>
-              </div>
-            </div>
-            <div class="card card-pad mb-2">
-              <h2 style="font-size:1.3rem;">Policy Platform</h2>
-              <div id="oppPolicyGroups"></div>
-            </div>
-            <div class="card card-pad mb-2">
-              <h2 style="font-size:1.3rem;">Character Traits</h2>
-              <div id="oppTraitSliders" class="grid grid-2" style="gap:1rem;"></div>
-            </div>
-            <div class="card card-pad">
-              <div class="flex-between">
-                <button type="button" class="btn" id="oppSaveBtn">Save as Opponent</button>
-                <button type="button" class="btn secondary" id="oppRandomizeBtn">🎲 Random Opponent</button>
-              </div>
-              <p id="oppFormMessage" role="status" class="mt-2" style="font-weight:600;"></p>
-            </div>
-          </form>
-          <aside>
-            <div style="position:sticky; top:100px;">
-              <p class="eyebrow text-center">Live Preview</p>
-              <div class="candidate-card" id="oppPreviewCard"></div>
-            </div>
-          </aside>
+      <div class="card card-pad mt-2 mb-2" id="currentOpponent" style="display:none;">
+        <div class="flex-between">
+          <div>
+            <p class="eyebrow" style="margin:0;">Currently running against</p>
+            <strong id="currentOpponentName" style="font-size:1.2rem;"></strong>
+          </div>
+          <button type="button" class="btn secondary small" id="clearOpponentBtn">✕ Clear — let the AI choose</button>
         </div>
       </div>
 
-      <div class="tab-panel" id="tab-roster">
+      <div class="tab-row">
+        <button class="tab-btn active" data-target="tab-roster">Pick a Fictional Politician</button>
+        <button class="tab-btn" data-target="tab-custom">Build a Custom Opponent</button>
+      </div>
+
+      <!-- Roster -->
+      <div class="tab-panel active" id="tab-roster">
         <div class="search-bar">
-          <input type="text" id="rosterSearch" placeholder="Search by name or party…" aria-label="Search fictional politicians">
+          <input type="text" id="rosterSearch" placeholder="Search by name, party, job, or issue…" aria-label="Search fictional politicians">
         </div>
         <p id="rosterMessage" role="status" style="font-weight:600;"></p>
         <div class="grid grid-3" id="rosterGrid" role="list"></div>
       </div>
 
+      <!-- Custom -->
+      <div class="tab-panel" id="tab-custom">
+        <div class="creator-layout">
+          <form id="opponentForm">
+            <section class="card creator-step">
+              <div class="step-head"><span class="step-badge">1</span><h2>Basics</h2></div>
+              <div class="form-grid">
+                <div class="field"><label for="oppNameInput">Candidate Name</label><input type="text" id="oppNameInput" placeholder="Morgan Prescott" autocomplete="off"></div>
+                <div class="field"><label for="oppPartyInput">Party</label><input type="text" id="oppPartyInput" placeholder="Heritage Party" autocomplete="off"></div>
+                <div class="field"><label for="oppAgeInput">Age</label><input type="number" id="oppAgeInput" min="25" max="90" value="52"></div>
+                <div class="field"><label for="oppStateSelect">Home State</label><select id="oppStateSelect"></select></div>
+                <div class="field"><label for="oppOccupationInput">Occupation Before Politics</label><input type="text" id="oppOccupationInput" placeholder="Governor" autocomplete="off"></div>
+                <div class="field"><label for="oppIssueSelect">Top Issue</label><select id="oppIssueSelect"></select></div>
+                <div class="field full">
+                  <label for="oppSloganInput">Campaign Slogan</label>
+                  <div style="display:flex; gap:0.6rem;">
+                    <input type="text" id="oppSloganInput" placeholder="A New Chapter Starts Now" style="flex:1;" autocomplete="off">
+                    <button type="button" class="btn secondary small" id="oppRandomSloganBtn">🎲</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card creator-step">
+              <div class="step-head"><span class="step-badge">2</span><h2>About This Opponent</h2></div>
+              <p class="step-hint">Three to five sentences, same as your own candidate. A vague opponent makes for a vague matchup.</p>
+              <textarea id="oppAboutInput" placeholder="Morgan Prescott is a careful, well-prepared career official who has never lost an election. They ran because they believe steady hands beat loud voices. Supporters call them dependable; critics call them dull." aria-label="About the opponent"></textarea>
+            </section>
+
+            <div class="card card-pad">
+              <div class="button-bar">
+                <button type="button" class="btn" id="oppSaveBtn">💾 Save as Opponent</button>
+                <button type="button" class="btn secondary" id="oppRandomizeBtn">🎲 Random Opponent</button>
+              </div>
+              <p id="oppFormMessage" role="status" class="mt-2" style="font-weight:600;"></p>
+            </div>
+          </form>
+
+          <aside class="creator-rail">
+            <p class="eyebrow text-center">Live Preview</p>
+            <div class="candidate-card" id="oppPreviewCard"></div>
+          </aside>
+        </div>
+      </div>
+
       <div class="text-center mt-2">
-        <a class="btn gold" href="simulator.html">Next: Run the Election →</a>
+        <a class="btn gold" href="simulator.html">Next: Run the Simulation →</a>
       </div>
     </div>
   </section>

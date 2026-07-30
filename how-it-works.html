@@ -39,43 +39,61 @@
   <section class="section" style="padding-top:2.5rem;">
     <div class="container">
       <p class="eyebrow">Under the hood</p>
-      <h1>How the Election Engine Works</h1>
-      <p class="hero-sub">The simulator uses weighted probability, not pure randomness, so results are believable, replayable, and never identical twice.</p>
+      <h1>How the Simulator Works</h1>
+      <p class="hero-sub">Your candidate is read by an AI acting as a nonpartisan polling analyst. It scores how well the candidate is <em>built</em> — never which politics they hold.</p>
 
       <div class="card card-pad mt-2">
         <ol class="numbered-steps">
-          <li><span class="step-num">01</span><div><strong>Trait Score.</strong> Each candidate's eight traits (charisma, integrity, public speaking,
-            debate skill, fundraising, popularity, experience, intelligence) are combined into a weighted score out of 100.</div></li>
-          <li><span class="step-num">02</span><div><strong>National Mood.</strong> The engine rolls a random ideological "mood" for each of the eight policy
-            issues, then measures how closely each candidate's platform matches that mood.</div></li>
-          <li><span class="step-num">03</span><div><strong>Campaign Events.</strong> Between 3 and 6 events are drawn from a pool of 16 — debates, scandals,
-            endorsements, economic swings, and more — each nudging one candidate's support up or down.</div></li>
-          <li><span class="step-num">04</span><div><strong>State-by-State Simulation.</strong> All 51 electoral-map entries (50 states plus D.C.) are simulated
-            individually. Home-state favorite bonuses, regional policy-focus matches, swing-state volatility, and independent
-            random noise all apply per state.</div></li>
-          <li><span class="step-num">05</span><div><strong>Electoral & Popular Vote.</strong> Electors are tallied per state (538 total, 270 to win) and the
-            national popular vote is calculated as a turnout-weighted average across every state.</div></li>
-          <li><span class="step-num">06</span><div><strong>Results Breakdown.</strong> The winner's top traits, the deciding issues, and the single most
-            influential campaign event are surfaced, along with a campaign rating from "Nail-Biter" to "Historic Landslide."</div></li>
+          <li><span class="step-num">01</span><div><strong>You build a candidate.</strong> Eight fields: name, age, party, occupation before
+            politics, home state, top issue, campaign slogan, and a 3–5 sentence description. The description does the most work.</div></li>
+          <li><span class="step-num">02</span><div><strong>The profile is sent to the analyst.</strong> Your browser posts the candidate to a small
+            server function. That function adds a secret API key and forwards the profile to OpenAI. The key never reaches your browser.</div></li>
+          <li><span class="step-num">03</span><div><strong>The analyst reads and reasons.</strong> It judges clarity, credibility, relatability,
+            memorability, and coherence — does the age, job, state, issue, and personality tell one consistent story?</div></li>
+          <li><span class="step-num">04</span><div><strong>It reports back in structured form.</strong> Approval rating, head-to-head poll,
+            support broken down by age, political lean, and location, plus strengths, weaknesses, and campaign events.</div></li>
+          <li><span class="step-num">05</span><div><strong>The site checks the numbers.</strong> Before anything is displayed, the server verifies
+            the percentages add to 100 and every voter group is present, repairing the response if the model drifts.</div></li>
+          <li><span class="step-num">06</span><div><strong>You change one thing and run it again.</strong> That comparison — same candidate,
+            sharper slogan or a different top issue — is where the actual learning happens.</div></li>
         </ol>
+      </div>
+
+      <div class="card card-pad mt-2">
+        <h2 style="font-size:1.4rem;">Where the numbers come from</h2>
+        <p>The analyst is explicitly instructed that no party, ideology, or issue position is more popular, more moral,
+        or more electable than any other. Democrat, Republican, Independent, Libertarian, Green, and invented parties all
+        start from the same place. A party label changes <em>which voter groups start friendly or skeptical</em> — it never
+        changes the candidate's overall score. Two equally well-written candidates score equally well no matter what they believe.</p>
+        <p>What actually moves the number: whether the slogan is memorable, whether the old job supports the chosen issue,
+        whether the description is specific instead of generic, and whether the pieces contradict each other. A nurse running
+        on healthcare starts with earned authority. A nurse running on national security has to build it.</p>
       </div>
 
       <div class="grid grid-3 mt-2">
         <div class="card feature-card">
           <img class="feature-icon" src="assets/svg/election-map.svg" alt="" aria-hidden="true">
           <h3>Never Identical</h3>
-          <p>National mood, campaign events, and per-state noise are re-rolled every run, so no two elections play out the same way — even with identical candidates.</p>
+          <p>Run the same candidate twice and you will get a similar verdict with different wording, different events, and slightly different numbers — the same way two real pollsters disagree.</p>
         </div>
         <div class="card feature-card">
           <img class="feature-icon" src="assets/icons/vote-check.svg" alt="" aria-hidden="true">
-          <h3>Weighted, Not Random</h3>
-          <p>Stronger candidates on the issues that matter to the national mood are favored — but a well-timed event can still flip a close race.</p>
+          <h3>Nonpartisan by Design</h3>
+          <p>The analyst is barred from praising or criticizing any real-world political position, naming any real politician, or treating one party as easier to win with than another.</p>
         </div>
         <div class="card feature-card">
           <img class="feature-icon" src="assets/svg/ballot-box.svg" alt="" aria-hidden="true">
-          <h3>Everything Local</h3>
-          <p>All of this runs client-side in your browser using plain JavaScript — nothing is sent to a server, ever.</p>
+          <h3>Works Offline Too</h3>
+          <p>If the AI cannot be reached, a built-in local model produces a full report using the same rules, so a classroom never gets stuck on a blank screen.</p>
         </div>
+      </div>
+
+      <div class="card card-pad mt-2">
+        <h2 style="font-size:1.4rem;">This is fiction</h2>
+        <p>Every voter, poll, percentage, and campaign event in this site is invented. Nothing here describes, predicts,
+        or comments on a real election, a real person, or a real political party. Real polling involves sampling thousands
+        of actual people, weighting for turnout, and reporting a margin of error. This is a story generator that looks like
+        a poll — useful for learning what the pieces of a campaign are, useless for predicting anything.</p>
       </div>
 
       <div class="text-center mt-2">

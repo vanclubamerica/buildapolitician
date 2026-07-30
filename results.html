@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Election Simulator — Build-A-Politician</title>
-<meta name="description" content="Watch election night unfold state by state with live campaign events and vote counters.">
+<title>Results — Build-A-Politician</title>
+<meta name="description" content="The full breakdown of your fictional candidate's simulated election: approval, polling, voter groups, strengths, weaknesses, and campaign events.">
 <link rel="icon" href="assets/icons/logo-mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Warming up the news desk…</span></div>
+<div class="loading-screen" aria-hidden="true"><div class="loading-seal"></div><span class="loading-text">Counting the final ballots…</span></div>
 <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 
 <header class="site-header">
@@ -21,8 +21,8 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="create.html">Create Politician</a></li>
         <li><a href="opponent.html">Choose Opponent</a></li>
-        <li><a href="simulator.html" aria-current="page">Election Simulator</a></li>
-        <li><a href="results.html">Results</a></li>
+        <li><a href="simulator.html">Election Simulator</a></li>
+        <li><a href="results.html" aria-current="page">Results</a></li>
         <li><a href="how-it-works.html">How It Works</a></li>
         <li><a href="about.html">About</a></li>
       </ul>
@@ -39,61 +39,44 @@
 <main id="main">
   <section class="section" style="padding-top:2.5rem;">
     <div class="container">
-      <p class="eyebrow">Step 3 of 4</p>
-      <h1>Election Night</h1>
-      <p class="hero-sub">The polls are closing. Run the simulation to see states report, campaign events break, and a winner emerge.</p>
+      <p class="eyebrow">Step 3 of 3 — Results</p>
 
-      <div class="card card-pad mt-2" id="missingNotice" style="display:none;">
-        <h2 style="font-size:1.3rem;">Something's missing</h2>
-        <p>You need both a candidate and an opponent before election night can begin.</p>
+      <!-- Nothing run yet -->
+      <div class="card card-pad mt-2" id="resultsMissing" style="display:none;">
+        <h2 style="font-size:1.3rem;">No simulation yet</h2>
+        <p>Build a candidate and run the election simulation, and the full breakdown will land here.</p>
         <div class="hero-actions">
           <a class="btn" href="create.html">Create Your Politician</a>
-          <a class="btn secondary" href="opponent.html">Choose an Opponent</a>
+          <a class="btn secondary" href="simulator.html">Go to the Simulator</a>
         </div>
       </div>
 
-      <div id="simConsole">
-        <div class="vs-row mt-2">
-          <div class="candidate-card" style="max-width:280px;" id="matchupA"></div>
-          <div class="vs-badge">VS</div>
-          <div class="candidate-card" style="max-width:280px;" id="matchupB"></div>
+      <div id="resultsWrap" style="display:none;">
+        <div class="winner-banner">
+          <p class="eyebrow" id="resultEyebrow"></p>
+          <h2 id="winnerBannerText"></h2>
+          <p id="winnerBannerSub" style="margin:0;"></p>
         </div>
 
-        <div class="sim-console">
-          <div class="hero-actions" style="justify-content:center;">
-            <button class="btn gold" id="runBtn">▶ Run Election</button>
-            <button class="btn secondary" id="skipBtn">⏭ Skip to Results</button>
+        <div class="two-col mb-2">
+          <div>
+            <h3>The Candidate</h3>
+            <div class="candidate-card" id="resultCandidateCard"></div>
           </div>
-          <p id="projectionNote" style="font-weight:700; color:var(--gold-400); margin-top:1rem;"></p>
-          <div class="sim-log" id="simLog" aria-live="polite"></div>
-        </div>
-
-        <div class="vote-counter-row">
-          <div class="vote-counter"><div class="count" id="counterA">0</div><div class="who">Your Candidate</div></div>
-          <div class="vote-counter"><div class="count" id="counterB">0</div><div class="who">Opponent</div></div>
-        </div>
-        <div class="progress-track" aria-label="Electoral vote progress">
-          <div class="progress-fill-a" id="evBarA" style="width:0%;"></div>
-          <div class="progress-fill-b" id="evBarB" style="width:0%;"></div>
-        </div>
-        <div class="progress-labels"><span>0</span><span>270 to win</span><span>538</span></div>
-
-        <div id="popRow" style="display:none; margin-top:2rem;">
-          <h3>National Popular Vote</h3>
-          <div class="progress-track">
-            <div class="progress-fill-a" id="popBarA" style="width:0%;"></div>
-            <div class="progress-fill-b" id="popBarB" style="width:0%;"></div>
+          <div>
+            <h3>What Happens Next</h3>
+            <p>Change one thing about your candidate and run it again — a sharper slogan, a different top issue, a fuller story — and watch which numbers move. That comparison is the whole point of the exercise.</p>
+            <div class="button-bar">
+              <a class="btn" href="create.html">✎ Edit Candidate</a>
+              <a class="btn gold" href="simulator.html">↻ Run It Again</a>
+              <button class="btn secondary" id="printResultsBtn">🖨 Print</button>
+              <button class="btn secondary" id="downloadResultsBtn">⬇ Download JSON</button>
+            </div>
+            <p class="mt-2" id="ranAtNote" style="font-family:var(--font-mono); font-size:0.74rem; color:var(--text-dim);"></p>
           </div>
-          <div class="progress-labels"><span id="popLabelA"></span><span id="popLabelB"></span></div>
         </div>
 
-        <p class="text-center mt-2" id="winnerAnnounce" style="font-family:var(--font-display); font-size:1.6rem; text-transform:uppercase; color:var(--gold-400);"></p>
-        <div class="text-center">
-          <a class="btn navy" href="results.html" id="winnerLink" style="display:none;">See Full Results →</a>
-        </div>
-
-        <h3 class="mt-2">State-by-State</h3>
-        <div class="state-grid" id="stateGrid"></div>
+        <div id="reportRoot"></div>
       </div>
     </div>
   </section>
@@ -108,6 +91,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
-<script src="js/simulator.js"></script>
+<script src="js/report.js"></script>
+<script src="js/results.js"></script>
 </body>
 </html>

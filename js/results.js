@@ -1,6 +1,7 @@
 /* =========================================================================
-   results.js — reads the last simulation stored by simulator.js and
-   renders the full post-election breakdown.
+   results.js — reads the last simulation saved by simulator.js and renders
+   the full breakdown. The heavy lifting is in report.js; this file only
+   handles the banner, the candidate card, and the page-level actions.
    ========================================================================= */
 
 function initResultsPage() {
@@ -8,60 +9,55 @@ function initResultsPage() {
   const missing = document.getElementById("resultsMissing");
   const wrap = document.getElementById("resultsWrap");
 
-  if (!result) {
+  if (!result || !result.poll_results) {
     missing.style.display = "block";
     wrap.style.display = "none";
     return;
   }
+
   missing.style.display = "none";
   wrap.style.display = "block";
 
-  const winnerIsPlayer = result.winnerKey === "player";
-  const winner = result.winnerCandidate;
-  const loser = result.loserCandidate;
+  const poll = result.poll_results;
+  const margin = poll.candidate - poll.opponent;
+  const won = margin > 0;
+  const tied = margin === 0;
 
-  document.getElementById("winnerBannerText").textContent = `${winner.name} Wins the Election`;
+  document.getElementById("resultEyebrow").textContent = result.projection;
+  document.getElementById("winnerBannerText").textContent = tied
+    ? "Too Close to Call"
+    : (won ? `${result.candidate_name} Wins` : `${result.opponent_name} Wins`);
   document.getElementById("winnerBannerSub").textContent =
-    `${winner.party} • ${result.rating} • ${winnerIsPlayer ? result.electorsA : result.electorsB} electoral votes to ${winnerIsPlayer ? result.electorsB : result.electorsA}`;
+    `${result.candidate_name} ${poll.candidate}% · ${result.opponent_name} ${poll.opponent}% · Undecided ${poll.undecided}%`;
 
-  document.getElementById("popularSummary").innerHTML = `
-    <div class="stat-tile card"><span class="big-num">${result.popVoteA.toFixed(1)}%</span><span class="tile-label">${result.player.name}</span></div>
-    <div class="stat-tile card"><span class="big-num">${result.popVoteB.toFixed(1)}%</span><span class="tile-label">${result.opponent.name}</span></div>
-    <div class="stat-tile card"><span class="big-num">${result.otherShare.toFixed(1)}%</span><span class="tile-label">Other / Undecided</span></div>
-    <div class="stat-tile card"><span class="big-num">${result.electorsA} – ${result.electorsB}</span><span class="tile-label">Electoral Vote</span></div>
-  `;
+  const candidate = result.candidateSnapshot || Storage.load(Storage.KEY_PLAYER);
+  if (candidate) {
+    document.getElementById("resultCandidateCard").innerHTML =
+      CandidateUI.cardHtml(candidate, { showAbout: true });
+  }
 
-  document.getElementById("strengthsList").innerHTML = result.strengths.map(s => `<li>${s}</li>`).join("");
-  document.getElementById("weaknessesList").innerHTML = result.weaknesses.map(s => `<li>${s}</li>`).join("");
-  document.getElementById("decidingIssues").innerHTML = result.decidingIssues.map(i => `<span class="badge">${i}</span>`).join(" ");
-  document.getElementById("influentialEvent").textContent =
-    `${result.mostInfluentialEvent.label} — ${(result.mostInfluentialEvent.target === "player" ? result.player.name : result.opponent.name)} ${result.mostInfluentialEvent.text}`;
+  if (result.ranAt) {
+    const when = new Date(result.ranAt);
+    document.getElementById("ranAtNote").textContent =
+      "Simulation run " + when.toLocaleString() +
+      (result.source === "ai" ? " by the AI analyst." : " by the offline model.");
+  }
 
-  document.getElementById("explanationText").innerHTML = buildExplanation(result);
+  Report.render(document.getElementById("reportRoot"), result);
 
-  document.getElementById("funStats").innerHTML = `
-    <div class="stat-tile card"><span class="big-num">${result.statesWonA}</span><span class="tile-label">States Won — ${result.player.name}</span></div>
-    <div class="stat-tile card"><span class="big-num">${result.statesWonB}</span><span class="tile-label">States Won — ${result.opponent.name}</span></div>
-    <div class="stat-tile card"><span class="big-num">${result.swingStatesWon}</span><span class="tile-label">Swing States Won by Winner</span></div>
-    <div class="stat-tile card"><span class="big-num">${result.events.length}</span><span class="tile-label">Campaign Events</span></div>
-  `;
+  document.getElementById("printResultsBtn").addEventListener("click", () => window.print());
 
-  document.getElementById("ratingBadge").textContent = result.rating;
+  document.getElementById("downloadResultsBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (result.candidate_name || "candidate").replace(/\s+/g, "-").toLowerCase() + "-simulation.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
 
-  launchConfetti(document.getElementById("confettiLayer"), 80);
-}
-
-function buildExplanation(result) {
-  const winner = result.winnerCandidate;
-  const strongestTrait = result.strengths[0];
-  const topIssue = result.decidingIssues[0];
-  return `<p><strong>${winner.name}</strong> secured the presidency largely on the strength of ${strongestTrait.toLowerCase()}
-    and a platform that aligned closely with the national mood on <strong>${topIssue}</strong>.
-    The <strong>${result.mostInfluentialEvent.label}</strong> proved to be the single most influential moment of the race,
-    reshaping the trajectory of the final days of campaigning. In the end, ${winner.name} carried
-    ${result.winnerKey === "player" ? result.statesWonA : result.statesWonB} states worth
-    ${result.winnerKey === "player" ? result.electorsA : result.electorsB} electoral votes,
-    a result the model classifies as a <strong>${result.rating}</strong>.</p>`;
+  if (won) launchConfetti(document.getElementById("confettiLayer"), 80);
 }
 
 document.addEventListener("DOMContentLoaded", initResultsPage);

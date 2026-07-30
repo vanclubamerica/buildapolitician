@@ -47,16 +47,28 @@
           an invented character — no real names, likenesses, or endorsements are used anywhere in the project.
           It's meant purely as an entertaining way to explore how personal traits, policy platforms, and
           campaign events might interact in a simulated election.</p>
-          <p>The entire experience runs in your browser. There is no account, no server, and no data ever leaves
-          your device — candidates you save are stored locally using your browser's storage.</p>
+          <p>There is no account and no sign-up. The candidates you build are saved in your own browser. When you
+          run a simulation, the candidate profile you wrote is sent to an AI model to be analyzed, and the report
+          comes back — nothing else about you is collected or stored.</p>
         </div>
         <div class="card card-pad">
           <h2 style="font-size:1.3rem;">Created By</h2>
           <p><strong>Van Club America</strong><br>Van, Texas</p>
-          <p>Build-A-Politician was designed and built as a self-contained, static web project — plain HTML, CSS,
-          and JavaScript, with no frameworks or backend — so it can be hosted for free on GitHub Pages.</p>
+          <p>Build-A-Politician is plain HTML, CSS, and JavaScript with no frameworks. The one piece of server code
+          is a small function that holds the AI key so it never has to be exposed in the browser.</p>
           <img src="assets/svg/banner.svg" alt="Campaign bunting banner illustration" class="mt-2">
         </div>
+      </div>
+
+      <div class="card card-pad mt-2">
+        <h2 style="font-size:1.3rem;">On Fairness</h2>
+        <p>The AI analyst is instructed that no party, ideology, or issue position is inherently more popular, more
+        moral, or more electable than any other, and that it may never praise or criticize a real-world political
+        position. What it scores is how well a candidate is <em>constructed</em>: is the message clear, does the
+        background support the issue, is the slogan memorable, do the pieces tell one consistent story. Two equally
+        well-written candidates score equally well no matter what they believe.</p>
+        <p>The offline model that runs when the AI is unavailable follows the same rule, and the project's automated
+        tests check it directly: change only a candidate's party label and the headline poll number must not move.</p>
       </div>
 
       <div class="card card-pad mt-2">

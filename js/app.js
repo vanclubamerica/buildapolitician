@@ -175,6 +175,169 @@ function launchConfetti(container, count = 90) {
 }
 window.launchConfetti = launchConfetti;
 
+/* =========================================================================
+   CandidateUI — shared helpers used by the builder, the opponent picker,
+   the simulator and the results page. Defined here so all four stay in
+   sync on the candidate schema and the card markup.
+   ========================================================================= */
+const CandidateUI = {
+  /* Every candidate everywhere uses exactly this shape. */
+  blank() {
+    return {
+      name: "", age: 45, party: "", occupation: "", state: "Texas",
+      topIssue: "", slogan: "", about: "",
+      logoColor: (window.GameData && GameData.LOGO_COLOR_PALETTE[0]) || "#c8102e"
+    };
+  },
+
+  /* Never inject raw user text into innerHTML. */
+  escape(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  },
+
+  sentenceCount(text) {
+    return String(text || "").split(/[.!?]+/).filter(s => s.trim().length > 3).length;
+  },
+
+  initials(name) {
+    const clean = String(name || "").trim();
+    if (!clean) return "?";
+    return clean.split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  },
+
+  ageTag(age) {
+    const a = Number(age) || 0;
+    if (a < 35) return "A young challenger. Energy is easy; credibility is the climb.";
+    if (a < 50) return "Mid-career. Old enough for a record, young enough for change.";
+    if (a < 65) return "Seasoned. Voters expect experience and will ask for proof.";
+    return "A veteran figure. Trusted by some, called out of touch by others.";
+  },
+
+  issueIcon(issue) {
+    const found = (window.GameData ? GameData.TOP_ISSUES : []).find(i => i.value === issue);
+    return found ? found.icon : "🗳️";
+  },
+
+  /* The candidate card, used on the builder preview, the opponent preview,
+     and the simulator matchup row. */
+  cardHtml(c, options) {
+    const opts = options || {};
+    const esc = CandidateUI.escape;
+    const color = c.logoColor || "#c8102e";
+    const aboutBlock = opts.showAbout && c.about
+      ? `<p class="candidate-about">${esc(c.about)}</p>` : "";
+    const issueBlock = c.topIssue
+      ? `<div class="candidate-issue-row"><span class="issue-pill">${CandidateUI.issueIcon(c.topIssue)} ${esc(c.topIssue)}</span></div>` : "";
+
+    return `
+      <div class="candidate-card-banner" style="background:linear-gradient(135deg, ${esc(color)}, var(--navy-900));"></div>
+      <div class="candidate-card-body">
+        <div class="candidate-avatar" style="background:${esc(color)}33;">${esc(CandidateUI.initials(c.name))}</div>
+        <h3 class="candidate-name">${esc(c.name) || "Your Candidate"}</h3>
+        <div class="candidate-party">${esc(c.party) || "Party TBD"}</div>
+        <p class="candidate-slogan">"${esc(c.slogan) || "A slogan for the ages"}"</p>
+        <dl class="candidate-meta">
+          <dt>Age</dt><dd>${esc(c.age) || "—"}</dd>
+          <dt>Home State</dt><dd>${esc(c.state) || "—"}</dd>
+          <dt>Was a</dt><dd>${esc(c.occupation) || "—"}</dd>
+          <dt>Runs on</dt><dd>${esc(c.topIssue) || "—"}</dd>
+        </dl>
+        ${issueBlock}
+        ${aboutBlock}
+      </div>`;
+  },
+
+  /* Renders a grid of selectable tiles. `items` may be strings or
+     { value, icon, blurb } objects. Calls onPick(value) on selection. */
+  renderTiles(container, items, selected, onPick) {
+    if (!container) return;
+    container.innerHTML = "";
+    items.forEach(item => {
+      const value = typeof item === "string" ? item : item.value;
+      const icon = typeof item === "string" ? "" : (item.icon || "");
+      const blurb = typeof item === "string" ? "" : (item.blurb || "");
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "pick-tile" + (value === selected ? " selected" : "");
+      tile.setAttribute("role", "radio");
+      tile.setAttribute("aria-checked", value === selected ? "true" : "false");
+      tile.dataset.value = value;
+      tile.innerHTML =
+        (icon ? `<span class="tile-icon" aria-hidden="true">${icon}</span>` : "") +
+        `<span class="tile-name">${CandidateUI.escape(value)}</span>` +
+        (blurb ? `<span class="tile-blurb">${CandidateUI.escape(blurb)}</span>` : "");
+      tile.addEventListener("click", () => {
+        container.querySelectorAll(".pick-tile").forEach(t => {
+          t.classList.remove("selected");
+          t.setAttribute("aria-checked", "false");
+        });
+        tile.classList.add("selected");
+        tile.setAttribute("aria-checked", "true");
+        playBlip(520, 0.06);
+        onPick(value);
+      });
+      container.appendChild(tile);
+    });
+  },
+
+  fillSelect(select, list, selected) {
+    if (!select) return;
+    select.innerHTML = "";
+    list.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item;
+      opt.textContent = item;
+      if (item === selected) opt.selected = true;
+      select.appendChild(opt);
+    });
+  },
+
+  renderSwatches(container, selected, onPick) {
+    if (!container) return;
+    container.innerHTML = "";
+    GameData.LOGO_COLOR_PALETTE.forEach(color => {
+      const sw = document.createElement("button");
+      sw.type = "button";
+      sw.className = "color-swatch" + (color === selected ? " selected" : "");
+      sw.style.background = color;
+      sw.setAttribute("aria-label", "Campaign color " + color);
+      sw.addEventListener("click", () => {
+        container.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
+        sw.classList.add("selected");
+        onPick(color);
+      });
+      container.appendChild(sw);
+    });
+  },
+
+  /* Which of the eight required fields are filled in. */
+  REQUIRED: [
+    { key: "name",       label: "Name" },
+    { key: "age",        label: "Age" },
+    { key: "party",      label: "Party" },
+    { key: "occupation", label: "Occupation" },
+    { key: "state",      label: "Home State" },
+    { key: "topIssue",   label: "Top Issue" },
+    { key: "slogan",     label: "Slogan" },
+    { key: "about",      label: "About (3+ sentences)" }
+  ],
+
+  isFilled(c, key) {
+    if (key === "age") return Number(c.age) >= 25;
+    if (key === "about") return CandidateUI.sentenceCount(c.about) >= 3;
+    return String(c[key] || "").trim().length > 0;
+  },
+
+  completeness(c) {
+    const done = CandidateUI.REQUIRED.filter(f => CandidateUI.isFilled(c, f.key));
+    return { done: done.length, total: CandidateUI.REQUIRED.length,
+             pct: Math.round((done.length / CandidateUI.REQUIRED.length) * 100) };
+  }
+};
+window.CandidateUI = CandidateUI;
+
 /* ---------------------------- Footer year + loading screen ---------------------------- */
 function initFooterYear() {
   document.querySelectorAll("[data-year]").forEach(el => { el.textContent = new Date().getFullYear(); });

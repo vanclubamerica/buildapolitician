@@ -1,176 +1,205 @@
 /* =========================================================================
    builder.js — Create Politician page.
-   Renders the policy chip groups + trait sliders from data.js, keeps a
-   live "candidate" object in memory, mirrors it onto the preview card,
-   and implements save / download / load / reset / print.
+
+   Keeps one `candidate` object in memory, mirrors it onto the preview card
+   and the completion rail, and persists it to localStorage. Shared card /
+   tile rendering lives in app.js (CandidateUI) so the opponent page and
+   the simulator stay in sync with this schema.
    ========================================================================= */
 
-const TRAITS = [
-  { id: "charisma", label: "Charisma" },
-  { id: "integrity", label: "Integrity" },
-  { id: "publicSpeaking", label: "Public Speaking" },
-  { id: "debateSkill", label: "Debate Skill" },
-  { id: "fundraising", label: "Fundraising Ability" },
-  { id: "popularity", label: "Popularity" },
-  { id: "experience", label: "Experience" },
-  { id: "intelligence", label: "Intelligence" }
-];
+let candidate = CandidateUI.blank();
 
-let candidate = defaultCandidate();
+/* --------------------------- section state --------------------------- */
 
-function defaultCandidate() {
-  return {
-    name: "", party: "", slogan: "", age: 45, state: "Texas",
-    experience: "", occupation: "", leadership: GameData.LEADERSHIP_STYLES[0],
-    speech: GameData.SPEECH_STYLES[0],
-    economicFocus: "", foreignPolicyFocus: "",
-    educationPosition: "", healthcarePosition: "", immigrationPosition: "",
-    environmentPosition: "", crimePosition: "", taxPosition: "",
-    militaryPosition: "", governmentSize: "",
-    traits: { charisma: 60, integrity: 60, publicSpeaking: 60, debateSkill: 60,
-      fundraising: 60, popularity: 60, experience: 60, intelligence: 60 },
-    logoColor: GameData.LOGO_COLOR_PALETTE[0]
-  };
-}
-
-function buildSelectOptions(select, list, selected) {
-  select.innerHTML = "";
-  list.forEach(item => {
-    const opt = document.createElement("option");
-    opt.value = item; opt.textContent = item;
-    if (item === selected) opt.selected = true;
-    select.appendChild(opt);
+/* Marks a step card green once its field is filled. Pure visual feedback,
+   but it is what makes the page feel like a character creator rather than
+   a form. */
+function refreshStepStates() {
+  CandidateUI.REQUIRED.forEach(field => {
+    const step = document.getElementById("step-" + field.key);
+    if (!step) return;
+    step.classList.toggle("is-complete", CandidateUI.isFilled(candidate, field.key));
   });
 }
 
-function renderPolicyGroups() {
-  const wrap = document.getElementById("policyGroups");
-  wrap.innerHTML = "";
-  GameData.POLICY_QUESTIONS.forEach(q => {
-    const fs = document.createElement("fieldset");
-    const legend = document.createElement("legend");
-    legend.textContent = q.label;
-    fs.appendChild(legend);
-    const group = document.createElement("div");
-    group.className = "choice-group";
-    group.setAttribute("role", "radiogroup");
-    group.setAttribute("aria-label", q.label);
-    q.options.forEach(opt => {
-      const chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "choice-chip";
-      chip.textContent = opt.value;
-      chip.setAttribute("role", "radio");
-      chip.setAttribute("aria-checked", candidate[q.id] === opt.value ? "true" : "false");
-      if (candidate[q.id] === opt.value) chip.classList.add("selected");
-      chip.addEventListener("click", () => {
-        candidate[q.id] = opt.value;
-        group.querySelectorAll(".choice-chip").forEach(c => { c.classList.remove("selected"); c.setAttribute("aria-checked", "false"); });
-        chip.classList.add("selected");
-        chip.setAttribute("aria-checked", "true");
-        playBlip(500, 0.06);
-        updatePreview();
-      });
-      group.appendChild(chip);
-    });
-    fs.appendChild(group);
-    wrap.appendChild(fs);
-    if (!candidate[q.id]) candidate[q.id] = q.options[0].value;
-  });
+function refreshCompletion() {
+  const { done, total, pct } = CandidateUI.completeness(candidate);
+  document.getElementById("completionPct").textContent = pct + "%";
+  document.getElementById("completionMeter").style.width = pct + "%";
+
+  const list = document.getElementById("checklist");
+  list.innerHTML = CandidateUI.REQUIRED.map(f =>
+    `<li class="${CandidateUI.isFilled(candidate, f.key) ? "done" : ""}">${f.label}</li>`
+  ).join("");
+
+  const cta = document.getElementById("toSimBtn");
+  if (cta) {
+    cta.textContent = done === total
+      ? "⚡ Run Election Simulation →"
+      : `⚡ Run Simulation (${done}/${total} done)`;
+  }
 }
 
-function renderTraitSliders() {
-  const wrap = document.getElementById("traitSliders");
-  wrap.innerHTML = "";
-  TRAITS.forEach(t => {
-    const field = document.createElement("div");
-    field.className = "slider-field";
-    field.innerHTML = `
-      <label for="trait-${t.id}">${t.label}</label>
-      <div class="slider-row">
-        <input type="range" min="0" max="100" value="${candidate.traits[t.id]}" id="trait-${t.id}" />
-        <span class="slider-value" id="trait-${t.id}-val">${candidate.traits[t.id]}</span>
-      </div>`;
-    wrap.appendChild(field);
-    const input = field.querySelector("input");
-    const val = field.querySelector(".slider-value");
-    input.addEventListener("input", () => {
-      candidate.traits[t.id] = Number(input.value);
-      val.textContent = input.value;
-      updatePreview();
-    });
-  });
+let previewTimer = null;
+function updatePreview(pop) {
+  const card = document.getElementById("previewCard");
+  card.innerHTML = CandidateUI.cardHtml(candidate, { showAbout: true });
+  if (pop) {
+    card.classList.remove("pop");
+    void card.offsetWidth;            // restart the animation
+    card.classList.add("pop");
+  }
+  refreshStepStates();
+  refreshCompletion();
+
+  /* Autosave, debounced, so a student never loses work by navigating away. */
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => Storage.save(Storage.KEY_PLAYER, candidate), 400);
 }
 
-function renderColorSwatches() {
-  const wrap = document.getElementById("colorSwatches");
-  wrap.innerHTML = "";
-  GameData.LOGO_COLOR_PALETTE.forEach(color => {
-    const sw = document.createElement("button");
-    sw.type = "button";
-    sw.className = "color-swatch";
-    sw.style.background = color;
-    sw.setAttribute("aria-label", "Choose logo color " + color);
-    if (candidate.logoColor === color) sw.classList.add("selected");
-    sw.addEventListener("click", () => {
-      candidate.logoColor = color;
-      wrap.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
-      sw.classList.add("selected");
-      updatePreview();
-    });
-    wrap.appendChild(sw);
-  });
-}
+/* ------------------------------- fields ------------------------------- */
 
-function bindTextField(id, key, isNumber) {
+function bindText(id, key) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.value = candidate[key] ?? "";
+  el.value = candidate[key] || "";
   el.addEventListener("input", () => {
-    candidate[key] = isNumber ? Number(el.value) : el.value;
+    candidate[key] = el.value;
     updatePreview();
   });
 }
 
-function initials(name) {
-  return name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase() || "?";
+function renderPartyTiles() {
+  CandidateUI.renderTiles(
+    document.getElementById("partyTiles"),
+    GameData.PARTIES,
+    partySelection(),
+    value => {
+      const wrap = document.getElementById("customPartyWrap");
+      if (value === "Custom") {
+        wrap.style.display = "";
+        const input = document.getElementById("customPartyInput");
+        candidate.party = input.value.trim();
+        input.focus();
+      } else {
+        wrap.style.display = "none";
+        candidate.party = value;
+      }
+      updatePreview(true);
+    }
+  );
 }
 
-function updatePreview() {
-  const p = document.getElementById("previewCard");
-  const traitsHtml = TRAITS.map(t => {
-    const v = candidate.traits[t.id];
-    return `<div class="stat-bar-row"><span>${t.label}</span>
-      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${v}%"></div></div>
-      <span>${v}</span></div>`;
-  }).join("");
-
-  p.innerHTML = `
-    <div class="candidate-card-banner" style="background:linear-gradient(135deg, ${candidate.logoColor}, var(--navy-900));">
-    </div>
-    <div class="candidate-card-body">
-      <div class="candidate-avatar" style="border-color:var(--card-bg); background:${candidate.logoColor}22;">${initials(candidate.name || "Your Candidate")}</div>
-      <h3 class="candidate-name">${candidate.name || "Your Candidate"}</h3>
-      <div class="candidate-party">${candidate.party || "Independent Party"}</div>
-      <p class="candidate-slogan">"${candidate.slogan || "A slogan for the ages"}"</p>
-      <dl class="candidate-meta">
-        <dt>Age</dt><dd>${candidate.age || "—"}</dd>
-        <dt>Home State</dt><dd>${candidate.state || "—"}</dd>
-        <dt>Occupation</dt><dd>${candidate.occupation || "—"}</dd>
-        <dt>Leadership</dt><dd>${candidate.leadership || "—"}</dd>
-      </dl>
-      <div class="stat-bars">${traitsHtml}</div>
-    </div>`;
+/* Which party tile should read as selected — the named one, or Custom. */
+function partySelection() {
+  if (!candidate.party) return "";
+  const known = GameData.PARTIES.some(p => p.value === candidate.party);
+  return known ? candidate.party : "Custom";
 }
 
-function validateCandidate() {
-  const errors = [];
-  if (!candidate.name.trim()) errors.push("Candidate Name is required.");
-  if (!candidate.party.trim()) errors.push("Political Party Name is required.");
-  if (!candidate.slogan.trim()) errors.push("Campaign Slogan is required.");
-  if (!candidate.age || candidate.age < 35 || candidate.age > 100) errors.push("Age must be between 35 and 100.");
-  return errors;
+function renderOccupationTiles() {
+  const known = GameData.OCCUPATIONS.some(o => o.value === candidate.occupation);
+  CandidateUI.renderTiles(
+    document.getElementById("occupationTiles"),
+    GameData.OCCUPATIONS,
+    candidate.occupation && !known ? "Custom" : candidate.occupation,
+    value => {
+      const wrap = document.getElementById("customOccupationWrap");
+      if (value === "Custom") {
+        wrap.style.display = "";
+        const input = document.getElementById("customOccupationInput");
+        candidate.occupation = input.value.trim();
+        input.focus();
+      } else {
+        wrap.style.display = "none";
+        candidate.occupation = value;
+      }
+      updatePreview(true);
+    }
+  );
 }
+
+function renderIssueTiles() {
+  CandidateUI.renderTiles(
+    document.getElementById("issueTiles"),
+    GameData.TOP_ISSUES,
+    candidate.topIssue,
+    value => { candidate.topIssue = value; updatePreview(true); }
+  );
+}
+
+function setAge(value) {
+  candidate.age = Number(value);
+  document.getElementById("ageNum").textContent = candidate.age;
+  document.getElementById("ageTag").textContent = CandidateUI.ageTag(candidate.age);
+  document.getElementById("ageInput").value = candidate.age;
+}
+
+/* -------------------------- guided About box -------------------------- */
+
+function renderAboutPrompts() {
+  const wrap = document.getElementById("aboutPrompts");
+  wrap.innerHTML = "";
+  GameData.ABOUT_PROMPTS.forEach((p, index) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "prompt-chip";
+    chip.dataset.index = index;
+    chip.textContent = p.q;
+    chip.title = "Add a sentence starter for this question";
+    chip.addEventListener("click", () => insertStarter(p.starter));
+    wrap.appendChild(chip);
+  });
+  markUsedPrompts();
+}
+
+/* Drops a sentence starter at the end of the textarea, with the candidate's
+   own name substituted in so it reads naturally. */
+function insertStarter(starter) {
+  const box = document.getElementById("aboutInput");
+  const name = (candidate.name || "").trim() || "This candidate";
+  const text = starter.replace(/NAME/g, name);
+  const current = box.value.replace(/\s+$/, "");
+  const needsSpace = current.length > 0;
+  box.value = current + (needsSpace ? " " : "") + text;
+  candidate.about = box.value;
+  box.focus();
+  box.setSelectionRange(box.value.length, box.value.length);
+  playBlip(600, 0.07);
+  updateSentenceMeter();
+  updatePreview();
+}
+
+/* A prompt counts as "used" once enough sentences exist to cover it. This
+   is a nudge, not a grade — students can write however they like. */
+function markUsedPrompts() {
+  const sentences = CandidateUI.sentenceCount(candidate.about);
+  document.querySelectorAll("#aboutPrompts .prompt-chip").forEach(chip => {
+    chip.classList.toggle("used", Number(chip.dataset.index) < sentences);
+  });
+}
+
+function updateSentenceMeter() {
+  const count = CandidateUI.sentenceCount(candidate.about);
+  const dots = document.getElementById("sentenceDots");
+  dots.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const dot = document.createElement("i");
+    if (i < count) dot.className = i < 5 ? "filled" : "over";
+    dots.appendChild(dot);
+  }
+
+  const status = document.getElementById("sentenceStatus");
+  const word = count === 1 ? "sentence" : "sentences";
+  if (count === 0)      { status.textContent = "0 sentences — aim for 3 to 5"; status.className = "sentence-status"; }
+  else if (count < 3)   { status.textContent = `${count} ${word} — keep going, 3 is the minimum`; status.className = "sentence-status warn"; }
+  else if (count <= 5)  { status.textContent = `${count} ${word} — that is the sweet spot`; status.className = "sentence-status good"; }
+  else                  { status.textContent = `${count} ${word} — plenty. The analyst reads all of it.`; status.className = "sentence-status good"; }
+
+  markUsedPrompts();
+}
+
+/* ------------------------------ actions ------------------------------ */
 
 function showFormMessage(msg, isError) {
   const el = document.getElementById("formMessage");
@@ -178,60 +207,152 @@ function showFormMessage(msg, isError) {
   el.style.color = isError ? "var(--red-400)" : "#6be089";
 }
 
+function applyCandidate(next, message) {
+  candidate = Object.assign(CandidateUI.blank(), next);
+  syncAllInputs();
+  if (message) showFormMessage(message, false);
+  playBlip(660, 0.12, "triangle");
+}
+
+/* Pushes the whole candidate object back out into every control. Called on
+   load, on Surprise Me, on Load Example, and on file import. */
+function syncAllInputs() {
+  document.getElementById("nameInput").value = candidate.name || "";
+  document.getElementById("sloganInput").value = candidate.slogan || "";
+  document.getElementById("aboutInput").value = candidate.about || "";
+  setAge(candidate.age);
+
+  const knownParty = GameData.PARTIES.some(p => p.value === candidate.party);
+  document.getElementById("customPartyWrap").style.display =
+    (candidate.party && !knownParty) ? "" : "none";
+  document.getElementById("customPartyInput").value =
+    (candidate.party && !knownParty) ? candidate.party : "";
+
+  const knownOcc = GameData.OCCUPATIONS.some(o => o.value === candidate.occupation);
+  document.getElementById("customOccupationWrap").style.display =
+    (candidate.occupation && !knownOcc) ? "" : "none";
+  document.getElementById("customOccupationInput").value =
+    (candidate.occupation && !knownOcc) ? candidate.occupation : "";
+
+  CandidateUI.fillSelect(document.getElementById("stateSelect"), GameData.US_STATE_LIST, candidate.state);
+  renderPartyTiles();
+  renderOccupationTiles();
+  renderIssueTiles();
+  CandidateUI.renderSwatches(document.getElementById("colorSwatches"), candidate.logoColor,
+    color => { candidate.logoColor = color; updatePreview(true); });
+  updateSentenceMeter();
+  updatePreview(true);
+}
+
+function randomizeCandidate() {
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const name = GameData.generateRandomName();
+  const first = name.split(" ")[0];
+  const occupation = pick(GameData.OCCUPATIONS.filter(o => o.value !== "Custom")).value;
+  const issue = pick(GameData.TOP_ISSUES).value;
+
+  applyCandidate({
+    name: name,
+    age: 30 + Math.floor(Math.random() * 45),
+    party: pick(GameData.PARTIES.filter(p => p.value !== "Custom")).value,
+    occupation: occupation,
+    state: pick(GameData.US_STATE_LIST),
+    topIssue: issue,
+    slogan: GameData.generateRandomSlogan(),
+    about: [
+      `${name} is ${pick(GameData.RANDOM_TEMPERAMENTS)} ${occupation.toLowerCase()} from a place most politicians fly over.`,
+      `${first} ran for office because ${pick(GameData.RANDOM_MOTIVES)}.`,
+      `As a leader, ${first} ${pick(GameData.RANDOM_LEAD_STYLES)}.`,
+      `The campaign lives and dies on ${issue.toLowerCase()}, and ${first} will not talk about much else.`,
+      `Supporters find ${first} ${pick(GameData.RANDOM_VIEWS)}.`
+    ].join(" "),
+    logoColor: pick(GameData.LOGO_COLOR_PALETTE)
+  }, "Random candidate generated. Edit anything you like.");
+}
+
+function downloadCandidate() {
+  const blob = new Blob([JSON.stringify(candidate, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = (candidate.name ? candidate.name.replace(/\s+/g, "-").toLowerCase() : "candidate") + ".json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ------------------------------- init -------------------------------- */
+
 function initBuilderPage() {
   const saved = Storage.load(Storage.KEY_PLAYER);
-  if (saved) candidate = Object.assign(defaultCandidate(), saved);
+  if (saved) candidate = Object.assign(CandidateUI.blank(), saved);
 
-  document.getElementById("stateSelect") && buildSelectOptions(document.getElementById("stateSelect"), GameData.US_STATE_LIST, candidate.state);
-  document.getElementById("leadershipSelect") && buildSelectOptions(document.getElementById("leadershipSelect"), GameData.LEADERSHIP_STYLES, candidate.leadership);
-  document.getElementById("speechSelect") && buildSelectOptions(document.getElementById("speechSelect"), GameData.SPEECH_STYLES, candidate.speech);
+  bindText("nameInput", "name");
+  bindText("sloganInput", "slogan");
 
-  bindTextField("nameInput", "name");
-  bindTextField("partyInput", "party");
-  bindTextField("sloganInput", "slogan");
-  bindTextField("ageInput", "age", true);
-  bindTextField("experienceInput", "experience");
-  bindTextField("occupationInput", "occupation");
-  bindTextField("economicFocusInput", "economicFocus");
-  bindTextField("foreignPolicyFocusInput", "foreignPolicyFocus");
+  document.getElementById("aboutInput").addEventListener("input", e => {
+    candidate.about = e.target.value;
+    updateSentenceMeter();
+    updatePreview();
+  });
 
-  document.getElementById("stateSelect").addEventListener("change", e => { candidate.state = e.target.value; updatePreview(); });
-  document.getElementById("leadershipSelect").addEventListener("change", e => { candidate.leadership = e.target.value; updatePreview(); });
-  document.getElementById("speechSelect").addEventListener("change", e => { candidate.speech = e.target.value; updatePreview(); });
+  document.getElementById("ageInput").addEventListener("input", e => {
+    setAge(e.target.value);
+    updatePreview();
+  });
 
-  renderPolicyGroups();
-  renderTraitSliders();
-  renderColorSwatches();
-  updatePreview();
+  document.getElementById("stateSelect").addEventListener("change", e => {
+    candidate.state = e.target.value;
+    updatePreview(true);
+  });
+
+  document.getElementById("customPartyInput").addEventListener("input", e => {
+    candidate.party = e.target.value;
+    updatePreview();
+  });
+
+  document.getElementById("customOccupationInput").addEventListener("input", e => {
+    candidate.occupation = e.target.value;
+    updatePreview();
+  });
+
+  renderAboutPrompts();
+  syncAllInputs();
+
+  document.getElementById("randomNameBtn").addEventListener("click", () => {
+    candidate.name = GameData.generateRandomName();
+    document.getElementById("nameInput").value = candidate.name;
+    playBlip(620, 0.08);
+    updatePreview(true);
+  });
 
   document.getElementById("randomSloganBtn").addEventListener("click", () => {
     candidate.slogan = GameData.generateRandomSlogan();
     document.getElementById("sloganInput").value = candidate.slogan;
-    updatePreview();
-    playBlip(600, 0.08);
+    playBlip(620, 0.08);
+    updatePreview(true);
   });
 
-  document.getElementById("randomCandidateBtn").addEventListener("click", () => {
-    randomizeCandidate();
+  document.getElementById("randomCandidateBtn").addEventListener("click", randomizeCandidate);
+
+  document.getElementById("exampleBtn").addEventListener("click", () => {
+    applyCandidate(GameData.EXAMPLE_CANDIDATE,
+      "Loaded the example candidate. Change anything — it is only a starting point.");
   });
 
   document.getElementById("saveBtn").addEventListener("click", () => {
-    const errors = validateCandidate();
-    if (errors.length) { showFormMessage(errors.join(" "), true); return; }
+    const missing = CandidateUI.REQUIRED.filter(f => !CandidateUI.isFilled(candidate, f.key));
     Storage.save(Storage.KEY_PLAYER, candidate);
-    showFormMessage("Candidate saved! Head to Choose Opponent when ready.", false);
-    playBlip(700, 0.15, "triangle");
+    if (missing.length) {
+      showFormMessage("Saved, but still empty: " + missing.map(m => m.label).join(", ") +
+        ". The simulation works best with everything filled in.", true);
+    } else {
+      showFormMessage("Candidate saved. Head to the Election Simulator whenever you are ready.", false);
+      playBlip(720, 0.15, "triangle");
+      launchConfetti(document.querySelector(".confetti-layer"), 40);
+    }
   });
 
-  document.getElementById("downloadBtn").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(candidate, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (candidate.name ? candidate.name.replace(/\s+/g, "-").toLowerCase() : "candidate") + ".json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+  document.getElementById("downloadBtn").addEventListener("click", downloadCandidate);
 
   document.getElementById("loadInput").addEventListener("change", e => {
     const file = e.target.files[0];
@@ -239,70 +360,25 @@ function initBuilderPage() {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const loaded = JSON.parse(reader.result);
-        candidate = Object.assign(defaultCandidate(), loaded);
-        document.getElementById("stateSelect").value = candidate.state;
-        document.getElementById("leadershipSelect").value = candidate.leadership;
-        document.getElementById("speechSelect").value = candidate.speech;
-        ["nameInput,name","partyInput,party","sloganInput,slogan","ageInput,age",
-         "experienceInput,experience","occupationInput,occupation",
-         "economicFocusInput,economicFocus","foreignPolicyFocusInput,foreignPolicyFocus"]
-         .forEach(pair => { const [id,key] = pair.split(","); const el = document.getElementById(id); if (el) el.value = candidate[key]; });
-        renderPolicyGroups();
-        renderTraitSliders();
-        renderColorSwatches();
-        updatePreview();
-        showFormMessage("Candidate loaded from file.", false);
+        applyCandidate(JSON.parse(reader.result), "Candidate loaded from file.");
       } catch (err) {
         showFormMessage("That file could not be read as a candidate JSON.", true);
       }
     };
     reader.readAsText(file);
+    e.target.value = "";
   });
 
   document.getElementById("resetBtn").addEventListener("click", () => {
-    if (!confirm("Reset the builder? This clears all fields.")) return;
-    candidate = defaultCandidate();
+    if (!confirm("Reset the builder? This clears every field.")) return;
     Storage.remove(Storage.KEY_PLAYER);
-    location.reload();
+    Storage.remove(Storage.KEY_RESULT);
+    candidate = CandidateUI.blank();
+    syncAllInputs();
+    showFormMessage("Builder reset.", false);
   });
 
   document.getElementById("printBtn").addEventListener("click", () => window.print());
-}
-
-function randomizeCandidate() {
-  candidate.name = GameData.generateRandomName();
-  candidate.party = ["Unity Party","Progress Alliance","Liberty Coalition","Common Ground Party","Forward Party"][Math.floor(Math.random()*5)];
-  candidate.slogan = GameData.generateRandomSlogan();
-  candidate.age = 38 + Math.floor(Math.random() * 40);
-  candidate.state = GameData.US_STATE_LIST[Math.floor(Math.random() * GameData.US_STATE_LIST.length)];
-  candidate.occupation = ["Attorney","Business Owner","Teacher","Veteran","Doctor","Mayor","Senator"][Math.floor(Math.random()*7)];
-  candidate.experience = ["Two terms in state legislature","First-time candidate","Former city council member","Longtime community organizer"][Math.floor(Math.random()*4)];
-  candidate.leadership = GameData.LEADERSHIP_STYLES[Math.floor(Math.random() * GameData.LEADERSHIP_STYLES.length)];
-  candidate.speech = GameData.SPEECH_STYLES[Math.floor(Math.random() * GameData.SPEECH_STYLES.length)];
-  candidate.economicFocus = ["Small business growth","Manufacturing jobs","Tech innovation","Middle-class tax relief"][Math.floor(Math.random()*4)];
-  candidate.foreignPolicyFocus = ["Strengthening alliances","Trade expansion","Diplomacy first","National security"][Math.floor(Math.random()*4)];
-  GameData.POLICY_QUESTIONS.forEach(q => { candidate[q.id] = q.options[Math.floor(Math.random() * q.options.length)].value; });
-  Object.keys(candidate.traits).forEach(k => { candidate.traits[k] = 30 + Math.floor(Math.random() * 71); });
-  candidate.logoColor = GameData.LOGO_COLOR_PALETTE[Math.floor(Math.random() * GameData.LOGO_COLOR_PALETTE.length)];
-
-  document.getElementById("nameInput").value = candidate.name;
-  document.getElementById("partyInput").value = candidate.party;
-  document.getElementById("sloganInput").value = candidate.slogan;
-  document.getElementById("ageInput").value = candidate.age;
-  document.getElementById("stateSelect").value = candidate.state;
-  document.getElementById("occupationInput").value = candidate.occupation;
-  document.getElementById("experienceInput").value = candidate.experience;
-  document.getElementById("leadershipSelect").value = candidate.leadership;
-  document.getElementById("speechSelect").value = candidate.speech;
-  document.getElementById("economicFocusInput").value = candidate.economicFocus;
-  document.getElementById("foreignPolicyFocusInput").value = candidate.foreignPolicyFocus;
-
-  renderPolicyGroups();
-  renderTraitSliders();
-  renderColorSwatches();
-  updatePreview();
-  playBlip(660, 0.12, "triangle");
 }
 
 document.addEventListener("DOMContentLoaded", initBuilderPage);

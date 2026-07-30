@@ -1,0 +1,16 @@
+{
+  "name": "build-a-politician",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A fictional political simulation game. Students design a candidate; an AI polling analyst returns a simulated election report.",
+  "scripts": {
+    "dev": "vercel dev",
+    "test": "node scripts/test-simulation.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "vercel": "^37.0.0"
+  }
+}
